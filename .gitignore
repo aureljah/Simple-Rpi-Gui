@@ -1,0 +1,8 @@
+.vs/
+build*/
+CMakeFiles/
+server/.vscode/
+.vscode/
+*CMakeLists.txt.user
+*.pem
+vgcore*

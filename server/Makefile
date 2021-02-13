@@ -4,17 +4,20 @@ RM = rm -rf
 
 NAME = server
 
-LDFLAGS = -L. -L./ -L/usr/lib/x86_64-linux-gnu -lssl
+LDFLAGS = -L. -L./ -L/usr/lib/x86_64-linux-gnu -lssl -lpthread
 
 CFLAGS = -Wall -O3
 
 SRC = src/main.cpp \
 		../shared_src/socket/linux/Socket.cpp \
-		src/openssl_wrapper/OpensslWrapper.cpp
+		../shared_src/socket/OpensslWrapper.cpp
+
+SRC_TEST = src/serv_test.cpp \
+		../shared_src/socket/linux/Socket.cpp \
+		../shared_src/socket/OpensslWrapper.cpp
 
 HDR =	-I../shared_src/socket \
-		-I../shared_src/socket/linux \
-		-Isrc/openssl_wrapper
+		-I../shared_src/socket/linux
 
 all: build
 
@@ -27,8 +30,12 @@ debug:
 clean:
 	$(RM) $(NAME)
 
+test: 
+	$(RM) test
+	$(CXX) $(CFLAGS) $(SRC_TEST) $(HDR) -o test $(LDFLAGS)
+
 fclean: clean
 
 re: clean all
 
-.PHONY: all re clean fclean
+.PHONY: all re clean fclean test

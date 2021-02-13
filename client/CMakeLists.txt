@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.10)
 project(simple_rpi_gui)
 set(EXEC_NAME simple_rpi_gui)
 
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
 IF( UNIX )
     set(ARCH linux)
 ENDIF( UNIX )
@@ -11,7 +16,7 @@ ENDIF( WIN32 )
 
 include_directories(src 
 		src/syscall
-		src/openssl_wrapper
+                src/gui
 		../shared_src/socket
 		../shared_src/socket/${ARCH}
 		)
@@ -20,19 +25,42 @@ add_executable(${EXEC_NAME} src/main.cpp
 			src/main.hpp
 			src/syscall/${ARCH}/Systemcall.cpp
 			src/syscall/Systemcall.hpp
+                        ../shared_src/socket/OpensslWrapper.cpp
+                        ../shared_src/socket/OpensslWrapper.hpp
 			../shared_src/socket/ASocket.hpp
 			../shared_src/socket/ISocket.hpp
 			../shared_src/socket/${ARCH}/Socket.cpp
 			../shared_src/socket/${ARCH}/Socket.hpp
-			src/openssl_wrapper/OpensslWrapper.cpp
-			src/openssl_wrapper/OpensslWrapper.hpp
+                        src/tools/tools.cpp
+                        src/tools/tools.h
+                        src/gui/mainwindow.cpp
+                        src/gui/mainwindow.h
+                        src/gui/mainwindow.ui
+                        src/gui/connection.cpp
+                        src/gui/connection.h
+                        src/gui/connection.ui
+                        src/gui/live/modelive.cpp
+                        src/gui/live/modelive.h
+                        src/gui/live/dynamicoutput.cpp
+                        src/gui/live/dynamicoutput.h
+                        src/gui/live/dynamicoutput.ui
+                        src/gui/live/dialog/gpiosettingdialog.cpp
+                        src/gui/live/dialog/gpiosettingdialog.h
+                        src/gui/live/dialog/gpiosettingdialog.ui
 			)
 
 find_package(OpenSSL REQUIRED)
 IF (OPENSSL_FOUND)
-	target_link_libraries(${EXEC_NAME} OpenSSL::SSL)
+        target_link_libraries(${EXEC_NAME} OpenSSL::SSL)
 ENDIF (OPENSSL_FOUND)
 
+#set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(${EXEC_NAME} ${CMAKE_THREAD_LIBS_INIT})
+#target_link_libraries(${EXEC_NAME} Threads::Threads)
+
+find_package(Qt5 COMPONENTS Widgets REQUIRED)
+target_link_libraries(${EXEC_NAME} Qt5::Widgets)
 
 IF( WIN32 )
 	target_link_libraries(${EXEC_NAME} ws2_32)

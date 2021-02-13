@@ -2,30 +2,29 @@
 
 void test_socket()
 {
+  std::cout << "\nin 2nd thread\n";
   ISocket *sock = new Socket("mycert.pem", OpensslWrapper::SERVER);
   ISocket *client = NULL;
   try {
-    sock->bind(4242);
+    sock->bind(4243);
     sock->listen(1);
 
     int count = 0;
     while(true)
     {
-      std::cout << "INFO: Ready, Waiting client to connect...\n\n";
       if ((client = sock->accept()) != NULL)
       { 
+        std::cout << "after accept: new connection\n";
         //sleep(1);
-        std::thread t2(test_second_socket, client->getIpStr(), 4243);
-        
-        //client->write("Heyyy !!! - " + std::to_string(count) + "\n");
+        //std::thread t2(test_second_socket, client->getIpStr(), 4243);
         //test_second_socket(client->getIpStr(), 4243);
 
         while (true)
         {
           try {
             std::string msg = client->read(4096);
-            std::cout << "[SERVER] client: " << msg << std::endl;
-            client->write("Heyyy !!! - " + std::to_string(count) + "\n");
+            std::cout << "[recv]: " << msg << std::endl;
+            //client->write("Hey from 2nd thread - " + std::to_string(count) + "\n");
             sleep(1);
             count++;
           }
@@ -35,7 +34,6 @@ void test_socket()
           }
         }
         delete client;
-        t2.join();
       }
     }
   }
@@ -47,32 +45,28 @@ void test_socket()
 
 void test_second_socket(std::string ip, int port)
 {
-  std::cout << "\nin test_second_socket\n";
   ISocket *client2 = new Socket("mycert.pem", OpensslWrapper::CLIENT);
 
   try {
-    sleep(2);
     client2->connect(ip, port);
-    int count = 0;
+    //test_socket();
+    std::thread t2(test_socket);
     while (true)
     {
-      sleep(5);
-      client2->write("PING from 2nd server thread - " + std::to_string(count));
-      count++;
+      sleep(3);
+      client2->write("Hey from 1st thread !\n");
     }
   }
   catch(char const *msg) {
-    std::cerr << "2nd thread: Error: " << msg << "\n";
+    std::cerr << "1st thread: Error: " << msg << "\n";
   }
-  delete client2;
-  std::cout << "==> End of second thread\n\n";
 }
 
 int main(int ac, char **av)
 {
   signal(SIGPIPE, SIG_IGN);
 
-  std::cout << "Starting Server...\n" << std::endl;
-  test_socket();
+  std::cout << "Starting Test...\n" << std::endl;
+  test_second_socket("127.0.0.1", 4242);
   return (0);
 }

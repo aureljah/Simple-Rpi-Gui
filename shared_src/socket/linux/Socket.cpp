@@ -1,8 +1,9 @@
 #include "Socket.hpp"
 
-Socket::Socket(OpensslWrapper* openssl)
-    : _fd(0), _sin(), _ssl(NULL), _openssl(openssl)
+Socket::Socket(std::string path_cert, OpensslWrapper::socketType type)
+    : _fd(0), _sin(), _ssl(NULL)
 {
+    this->_openssl = new OpensslWrapper(path_cert, type);
     //struct protoent* pe;
 
     //pe = getprotobyname("TCP");
@@ -46,6 +47,7 @@ void Socket::connect(std::string ip, int port)
     }
     else
         throw("could not connect !");
+    std::cout << "INFO: connected on " << ip << ":" << port << "\n";
 }
 
 void Socket::bind(int port)
@@ -72,7 +74,7 @@ void Socket::listen(int queueSize)
 ISocket* Socket::accept()
 {
     int ret = 0;
-    SSL *cssl;
+    SSL *cssl = NULL;
     struct sockaddr_in csin;
     int sin_size = sizeof(csin);
     const int cfd = ::accept(this->_fd, reinterpret_cast<struct sockaddr*>(&csin), reinterpret_cast<socklen_t*>(&sin_size));
@@ -85,8 +87,8 @@ ISocket* Socket::accept()
         //ERR_print_errors_fp(stdout);
         throw("SSL_accept");
     }
-
-    std::cout << "INFO: new connexion accepted - " << SSL_get_version(cssl) << " used.\n";
+    
+    std::cout << "INFO: new connexion accepted - " << inet_ntoa(csin.sin_addr) << " - " << SSL_get_version(cssl) << " used.\n";
     X509 *peer = NULL;
     peer = SSL_get_peer_certificate(cssl);
     if (peer) {

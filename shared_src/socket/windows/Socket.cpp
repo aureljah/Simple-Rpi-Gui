@@ -3,9 +3,11 @@
 #include <string.h>
 #include "Socket.hpp"
 
-Socket::Socket(OpensslWrapper* openssl)
-	: _fd(0), _sin(), _ssl(NULL), _openssl(openssl)
+Socket::Socket(std::string path_cert, OpensslWrapper::socketType type)
+    : _fd(0), _sin(), _ssl(NULL)
 {
+    this->_openssl = new OpensslWrapper(path_cert, type);
+    
 	WSADATA WSAData;
 	
 	WSAStartup(MAKEWORD(2, 0), &WSAData);

@@ -1,15 +1,23 @@
 #include "main.hpp"
 
-void test_socket()
+void test_gui(QApplication &app, ISocket *sock)
 {
-  OpensslWrapper *opensslWrap = new OpensslWrapper();
+    auto win = new MainWindow();
+    win->show();
 
-  ISocket *sock = new Socket(opensslWrap);
+    app.exec();
+}
+
+void test_socket(QApplication &app)
+{
+  ISocket *sock = new Socket("mycert.pem", OpensslWrapper::CLIENT);
   try {
     sock->connect("127.0.0.1", 4242);
     sock->write("Heyyy !!!");
     std::string msg = sock->read(4096);
     std::cout << "[CLIENT] server: " << msg << std::endl;
+
+    test_gui(app, sock);
   }
   catch(char const *msg) {
     std::cerr << "Error: " << msg << "\n";
@@ -19,13 +27,20 @@ void test_socket()
 
 int main(int ac, char **av)
 {
+  QApplication app (ac, av);
+
   std::cout << "Starting Client...\n" << std::endl;
   try {
-    test_socket();
+    auto win = new MainWindow();
+    //win->show();
+    app.exec();
+
+    //test_socket(app);
   }
   catch(char const *msg) {
     std::cerr << "Error: " << msg << "\n";
   }
+
   //systemcall::sys_usleep(5000);
   return (0);
 }
