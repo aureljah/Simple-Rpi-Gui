@@ -27,6 +27,7 @@ public:
 
 private:
     void updateTitle();
+    void updatePinValue(int new_value);
 
 signals:
     void live_output_editButton_clicked(QString name);
@@ -36,17 +37,22 @@ signals:
 
 private slots:
     void on_delButton_clicked();
-
     void mouseDoubleClickEvent(QMouseEvent *event);
-
     void on_upButton_clicked();
-
     void on_downButton_clicked();
+    void on_onButton_clicked(bool checked);
+    void on_offButton_clicked(bool checked);
+
+    void on_pwm_slider_valueChanged(int value);
+
+    void on_pwm_spinBox_valueChanged(int arg1);
 
 private:
     int pin;
     QString name;
     Ui::dynamicOutput *ui;
+
+    int value;
 };
 
 #endif // DYNAMICOUTPUT_H

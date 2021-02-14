@@ -44,9 +44,9 @@ add_executable(${EXEC_NAME} src/main.cpp
                         src/gui/live/dynamicoutput.cpp
                         src/gui/live/dynamicoutput.h
                         src/gui/live/dynamicoutput.ui
-                        src/gui/live/dialog/gpiosettingdialog.cpp
-                        src/gui/live/dialog/gpiosettingdialog.h
-                        src/gui/live/dialog/gpiosettingdialog.ui
+                        src/gui/live/gpiosettingdialog.cpp
+                        src/gui/live/gpiosettingdialog.h
+                        src/gui/live/gpiosettingdialog.ui
 			)
 
 find_package(OpenSSL REQUIRED)

@@ -14,7 +14,7 @@
 #include <map>
 #include <list>
 #include "dynamicoutput.h"
-#include "dialog/gpiosettingdialog.h"
+#include "gpiosettingdialog.h"
 #include "../tools/tools.h"
 
 class modeLive : public QObject

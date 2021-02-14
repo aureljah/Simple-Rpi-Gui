@@ -7,7 +7,7 @@
 #include <QMessageBox>
 #include <QStyle>
 #include <QDesktopWidget>
-#include "../../../tools/tools.h"
+#include "../../tools/tools.h"
 
 namespace Ui {
 class gpioSettingDialog;
