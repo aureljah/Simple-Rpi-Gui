@@ -5,6 +5,7 @@
 #include <QStyle>
 #include <QDebug>
 #include <QTimer>
+#include <cmath>
 
 namespace Ui {
 class dynamicOutput;
@@ -28,6 +29,7 @@ public:
 private:
     void updateTitle();
     void updatePinValue(int new_value);
+    void updateLcdNumber();
 
 signals:
     void live_output_editButton_clicked(QString name);

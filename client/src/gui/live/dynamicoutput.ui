@@ -50,12 +50,12 @@
     <item>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="1" column="0">
-       <widget class="QSpinBox" name="pwm_spinBox"/>
-      </item>
-      <item row="0" column="0">
-       <widget class="QCheckBox" name="pwm_checkBox">
-        <property name="text">
-         <string>Activate PWM</string>
+       <widget class="QSpinBox" name="pwm_spinBox">
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>27</height>
+         </size>
         </property>
        </widget>
       </item>
@@ -70,6 +70,11 @@
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QPushButton" name="onButton">
+          <property name="styleSheet">
+           <string notr="true">QPushButton:checked, QPushButton:pressed{
+	background-color: rgb(0, 85, 0);
+}</string>
+          </property>
           <property name="text">
            <string>Pin ON</string>
           </property>
@@ -83,6 +88,11 @@
         </item>
         <item>
          <widget class="QPushButton" name="offButton">
+          <property name="styleSheet">
+           <string notr="true">QPushButton:checked, QPushButton:pressed{
+	background-color: rgb(170, 0, 0);
+}</string>
+          </property>
           <property name="text">
            <string>Pin OFF</string>
           </property>
@@ -95,6 +105,22 @@
          </widget>
         </item>
        </layout>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLCDNumber" name="lcdNumber">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(0, 0, 0);</string>
+        </property>
+        <property name="intValue" stdset="0">
+         <number>42</number>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>

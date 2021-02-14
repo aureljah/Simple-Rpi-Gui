@@ -21,6 +21,8 @@ dynamicOutput::dynamicOutput(int pin, QString name, QWidget *parent) :
             ui->pwm_spinBox, &QSpinBox::setValue);
     connect(ui->pwm_spinBox, QOverload<int>::of(&QSpinBox::valueChanged),
             ui->pwm_slider, &QSlider::setValue);
+
+    this->updatePinValue(0);
 }
 
 dynamicOutput::~dynamicOutput()
@@ -74,6 +76,17 @@ void dynamicOutput::on_downButton_clicked()
     emit live_output_downButton_clicked(this->name);
 }
 
+void dynamicOutput::updateLcdNumber()
+{
+    ui->lcdNumber->display(this->value);
+
+    int green = floor(this->value * 1.7);
+    int red = 125 - (this->value * 2);
+    if (red < 0)
+        red = 0;
+    ui->lcdNumber->setStyleSheet("background-color: rgb("+QString::number(red)+", "+ QString::number(green) +", 0);");
+}
+
 void dynamicOutput::updatePinValue(int new_value)
 {
     if (new_value < 0)
@@ -85,6 +98,7 @@ void dynamicOutput::updatePinValue(int new_value)
 
     ui->pwm_slider->setValue(this->value);
     ui->pwm_spinBox->setValue(this->value);
+    this->updateLcdNumber();
 
     if (this->value == 0)
         ui->offButton->setChecked(true);

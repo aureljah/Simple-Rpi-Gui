@@ -40,6 +40,19 @@ gpioSettingDialog::gpioSettingDialog(std::list<QString> used_name, std::list<int
             }
         }
     }
+    else // set a valid default name (Output 1 / Output 2...)
+    {
+        for (int num = 1 ; num < 40 ; num++)
+        {
+            QString default_name = "Output " + QString::number(num);
+            if (std::find(this->used_name.begin(), this->used_name.end(), default_name) == this->used_name.end())
+            {
+                ui->lineEdit->setText(default_name);
+                break;
+            }
+        }
+
+    }
 
     ui->lineEdit->setFocus();
 }
