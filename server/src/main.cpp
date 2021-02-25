@@ -72,7 +72,10 @@ int main(int ac, char **av)
 {
   signal(SIGPIPE, SIG_IGN);
 
-  std::cout << "Starting Server...\n" << std::endl;
-  test_socket();
+  std::cout << "[INFO]: Starting Server...\n" << std::endl;
+  //test_socket();
+  MainServer* server = new MainServer();
+  server->run(4242, "mycert.pem");
+
   return (0);
 }

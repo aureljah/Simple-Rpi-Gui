@@ -10,7 +10,7 @@ void test_gui(QApplication &app, ISocket *sock)
 
 void test_socket(QApplication &app)
 {
-  ISocket *sock = new Socket("mycert.pem", OpensslWrapper::CLIENT);
+  ISocket *sock = new Socket("mycert.pem", OpensslWrapper::SERVER);
   try {
     sock->connect("127.0.0.1", 4242);
     sock->write("Heyyy !!!");

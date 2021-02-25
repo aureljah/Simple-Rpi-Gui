@@ -86,18 +86,18 @@ void MainWindow::onMsgFromServer(QString msg)
 void MainWindow::onConnected()
 {
     this->show();
-    this->pingServeur("Yoyoyo !!!");
+    //this->pingServeur("Yoyoyo !!!");
     QObject::connect(this, &MainWindow::new_serv_msg,
                      this, &MainWindow::onMsgFromServer);
-    std::thread t2(&MainWindow::second_thread_test, this);
-    t2.detach();
-    //this->second_thread_test();
+
+    //std::thread t2(&MainWindow::second_thread_test, this);
+    //t2.detach();
 }
 
 /* send ping/msg to server boutton */
 void MainWindow::on_pushButton_clicked()
 {
-    qInfo() << ui->lineEdit->text() << "\n";
+    qInfo() << "[DEBUG]: Debug input: " << ui->lineEdit->text() << "\n";
     this->pingServeur(ui->lineEdit->text());
     ui->lineEdit->clear();
 }

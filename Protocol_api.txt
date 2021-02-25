@@ -1,0 +1,65 @@
+https://elinux.org/RPi_GPIO_Code_Samples#pigpio
+
+
+PROTOCOL / API for simple_rpi_gui
+
+Every line/commande/response must finish by \r\n
+
+name cannot include \n or "
+
+
+# STATUS command give the status of the server, which mode is currently active and more information about what is active/runiing in these mode #
+
+STATUS
+    # possible responses #:
+        200 (LIVE | SCRIPT) 
+            LIVE [(input | output)]
+                output <pin> <value> <name>
+                input <pin> <name>
+            SCRIPT # TODO #
+        500 <error_msg>
+
+Example of response for STATUS:
+    200 LIVE
+        # mode LIVE active but no output or input is created #
+    200 LIVE output 8 1 "my output 1" output 5 0.54 "my LED output 35" input 3 "my input 3"\r\n
+        "mode LIVE active with 2 outputs and 1 input"
+
+
+
+# LIVE command is used to manage pin in Live mode with set and del #
+# Note: LIVE command will delete script mode and activate Live mode if not already active #
+
+LIVE (set | del)
+    set (input | output)
+        output <pin> <value> "<name>"
+        input <pin> "<name>"
+
+            # possible responses #:
+                        200 ok
+                        500 <error_msg>
+
+    del <pin>
+
+            # possible responses #:
+                    200 ok
+                    500 <error_msg>
+
+type for LIVE:
+    <name> => string
+    <pin> => int between 1 and 40
+    <value> => int between 0 and 100
+    
+Example for LIVE:
+    LIVE set output 8 100 "my output 1"\r\n
+        => will set (or create if needed) the output in pin 8 to value=100 and name="my output 1"
+    LIVE set output 5 54 "my LED output 35"\r\n
+        => will set (or create if needed) the output in pin 5 to value=54 (PWM is used here) and name="my LED output 35"
+    
+    LIVE set input 5 "my input"\r\n
+        => will set (or create if needed) the input in pin 5 to name="my input"
+    LIVE set input 8 "my input"\r\n
+        => will set (or create if needed) the input in pin 8 to name="my input 8"
+        
+    LIVE del 5
+        => will delete the output or input which pin=5
