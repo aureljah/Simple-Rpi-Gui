@@ -25,8 +25,8 @@ std::vector<std::string> MainServer::splitStrToArray(std::string cmd)
     {
         if (cmd[idx_start] == '"' && cmd.find("\"", idx_start + 1) != std::string::npos)
         {
-            idx_end = cmd.find("\"", idx_start + 1);
-            idx_end += 1;
+            idx_start += 1;
+            idx_end = cmd.find("\"", idx_start);
         }
 
         if (cmd[idx_start] != ' ')
@@ -61,7 +61,7 @@ std::string MainServer::parseCommand(std::string cmd)
     if (cmd_array[i] == "STATUS")
     {
         i++;
-        return "STATUS: TODO";
+        return this->getStatusCommand();
     }
     else if (cmd_array[i] == "LIVE")
     {
@@ -108,9 +108,28 @@ std::string MainServer::parseCommand(std::string cmd)
     return "TODO";
 }
 
+std::string MainServer::getStatusCommand()
+{
+    std::string status = "NONE";
+    if (this->live_mode)
+    {
+        status = "LIVE";
+        status += this->live_mode->getStatus();
+    }
+    // else if script mode
+
+    return status;
+}
+
 std::string MainServer::liveSetInputCommand(std::string cmd_pin, std::string cmd_name)
 {
     int pin = std::stoi(cmd_pin);
+    if (this->isPinNumberValid(pin) == false)
+        throw std::runtime_error("LIVE set input: invalid pin number");
+
+    if (this->isNameValid(cmd_name) == false)
+        throw std::runtime_error("LIVE set input: invalid name");
+
     this->useModeLive();
     return this->live_mode->setInput(pin, cmd_name);
 }
@@ -118,7 +137,16 @@ std::string MainServer::liveSetInputCommand(std::string cmd_pin, std::string cmd
 std::string MainServer::liveSetOutputCommand(std::string cmd_pin, std::string cmd_value, std::string cmd_name)
 {
     int pin = std::stoi(cmd_pin);
+    if (this->isPinNumberValid(pin) == false)
+        throw std::runtime_error("LIVE set output: invalid pin number");
+
     int value = std::stoi(cmd_value);
+    if (this->isValueValid(value) == false)
+        throw std::runtime_error("LIVE set output: invalid value number");
+
+    if (this->isNameValid(cmd_name) == false)
+        throw std::runtime_error("LIVE set output: invalid name");
+
     this->useModeLive();
     return this->live_mode->setOutput(pin, value, cmd_name);
 }
@@ -126,10 +154,12 @@ std::string MainServer::liveSetOutputCommand(std::string cmd_pin, std::string cm
 std::string MainServer::liveDelPinCommand(std::string cmd_pin)
 {
     int pin = std::stoi(cmd_pin);
+    if (this->isPinNumberValid(pin) == false)
+        throw std::runtime_error("LIVE del: invalid pin number");
+
     if (this->live_mode == nullptr)
-    {
         throw std::runtime_error("LIVE del: Live mode is not active");
-    }
+
     return this->live_mode->delPin(pin);
 }
 
@@ -138,6 +168,30 @@ bool MainServer::useModeLive()
     // del mode script if active
     if (this->live_mode == nullptr)
         this->live_mode = new LiveMode();
+
+    return true;
+}
+
+bool MainServer::isPinNumberValid(int pin)
+{
+    if (pin < 2 || pin > 26)
+        return false;
+
+    return true;
+}
+
+bool MainServer::isValueValid(int value)
+{
+    if (value < 0 || value > 100)
+        return false;
+
+    return true;
+}
+
+bool MainServer::isNameValid(std::string name)
+{
+    if (name == "" || name.length() > 32)
+        return false;
 
     return true;
 }

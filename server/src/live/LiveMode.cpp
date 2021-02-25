@@ -1,5 +1,6 @@
 #include "LiveMode.hpp"
 #include "LivePin.hpp"
+#include <string>
 
 LiveMode::LiveMode()
 {
@@ -31,6 +32,30 @@ LiveMode::~LiveMode()
 
 }
 
+std::string LiveMode::getStatus()
+{
+    std::string status;
+
+    for(std::map<int, LivePin*>::iterator it = this->inputs.begin(); it != this->inputs.end(); it++)
+    {
+        LivePin *tmp = it->second;
+        status += " input ";
+        status += std::to_string(tmp->getPin());
+        status += " \"" + tmp->getName() + "\"";
+    }
+
+    for(std::map<int, LivePin*>::iterator it = this->outputs.begin(); it != this->outputs.end(); it++)
+    {
+        LivePin *tmp = it->second;
+        status += " output ";
+        status += std::to_string(tmp->getPin());
+        status += " " + std::to_string(tmp->getValue());
+        status += " \"" + tmp->getName() + "\"";
+    }
+
+    return status;
+}
+
 std::string LiveMode::setOutput(int pin, int value, std::string name)
 {
     if (this->outputs.find(pin) != this->outputs.end())
@@ -40,8 +65,9 @@ std::string LiveMode::setOutput(int pin, int value, std::string name)
     }
     else
     {
-        this->delPin(pin); // in case input have same pin
-                            // => OR maybe not del but return error "pin already exists in input" ?
+        //this->delPin(pin); // in case one input have same pin
+        if (this->inputs.find(pin) != this->inputs.end())
+            throw std::runtime_error("Pin already exists as input");
 
         LivePin *new_output = new LivePin(this->rpi, pin, GPIO_TYPE::OUTPUT, name, value);
         this->outputs[pin] = new_output;
@@ -57,8 +83,9 @@ std::string LiveMode::setInput(int pin, std::string name)
     }
     else
     {
-        this->delPin(pin); // in case output have same pin
-                            // => OR maybe not del but return error "pin already exists in output" ?
+        //this->delPin(pin); // in case one output have same pin
+        if (this->outputs.find(pin) != this->outputs.end())
+            throw std::runtime_error("Pin already exists as output");
 
         LivePin *new_output = new LivePin(this->rpi, pin, GPIO_TYPE::INPUT, name);
         this->inputs[pin] = new_output;

@@ -17,6 +17,7 @@ STATUS
                 output <pin> <value> <name>
                 input <pin> <name>
             SCRIPT # TODO #
+            NONE
         500 <error_msg>
 
 Example of response for STATUS:

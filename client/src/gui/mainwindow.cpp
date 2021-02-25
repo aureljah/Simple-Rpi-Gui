@@ -17,8 +17,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    delete main_sock;
-    delete ui;
+    delete this->main_sock;
+    delete this->ui;
 }
 
 void MainWindow::startConnectWin()

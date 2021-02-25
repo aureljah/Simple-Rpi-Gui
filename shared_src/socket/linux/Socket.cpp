@@ -109,9 +109,9 @@ int Socket::read(void* buff, size_t len)
 {
     // ssize_t r = ::read(this->_fd, buff, len);
     int r = SSL_read(this->_ssl, buff, len);
-    if (r < 0)
+    if (r <= 0)
     {
-        SSL_get_error(this->_ssl, r);
+        //SSL_get_error(this->_ssl, r);
 	    throw("SSL_read");
     }
     return r;
@@ -142,7 +142,7 @@ int Socket::write(const void* buff, size_t len)
     int r = SSL_write(this->_ssl, buff, len);
     if (r <= 0)
     {
-        SSL_get_error(this->_ssl, r);
+        //SSL_get_error(this->_ssl, r);
 	    throw("SSL_write");
     }
     return r;

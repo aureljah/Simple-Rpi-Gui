@@ -31,6 +31,11 @@ private:
     std::string liveSetOutputCommand(std::string cmd_pin, std::string cmd_value, std::string cmd_name);
     std::string liveDelPinCommand(std::string cmd_pin);
 
+    /* TOOLS */
+    bool isPinNumberValid(int pin);
+    bool isValueValid(int value);
+    bool isNameValid(std::string name);
+
 private:
     // general settings ?
     // stay active after client disconnect
