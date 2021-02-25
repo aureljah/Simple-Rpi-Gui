@@ -1,4 +1,5 @@
 #include "Socket.hpp"
+#include <cstddef>
 
 Socket::Socket(std::string path_cert, OpensslWrapper::socketType type)
     : _fd(0), _sin(), _ssl(NULL)
@@ -114,6 +115,25 @@ int Socket::read(void* buff, size_t len)
 	    throw("SSL_read");
     }
     return r;
+}
+
+std::string Socket::readLine(size_t buffer_len)
+{
+    while (true)
+    {
+        this->buffer += this->read(buffer_len);
+
+        size_t idx_end = this->buffer.find("\r\n");
+        if (idx_end != std::string::npos)
+        {
+            std::string ret = this->buffer.substr(0, idx_end);
+            this->buffer = this->buffer.substr(idx_end + 2);
+
+            //std::cout << "[DEBUG]: readLine will return size: " << ret.size() << "\n";
+            //std::cout << "[DEBUG]: readLine will return saved buffer(size " << this->buffer.size() << "): " << this->buffer << "\n";
+            return ret;
+        }
+    }
 }
 
 int Socket::write(const void* buff, size_t len)

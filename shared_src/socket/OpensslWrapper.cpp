@@ -58,11 +58,8 @@ void OpensslWrapper::configureContext()
     if (SSL_CTX_use_certificate_file(this->ctx, this->path_ctx, SSL_FILETYPE_PEM) <= 0)
         throw("SSL_CTX_use_certificate_file");
 
-    if (this->stype == SERVER)
-    {
-        if (SSL_CTX_use_PrivateKey_file(this->ctx, this->path_ctx, SSL_FILETYPE_PEM) <= 0 )
-            throw("SSL_CTX_use_PrivateKey_file");
-    }
+    if (SSL_CTX_use_PrivateKey_file(this->ctx, this->path_ctx, SSL_FILETYPE_PEM) <= 0 )
+        throw("SSL_CTX_use_PrivateKey_file");
 
     if(!SSL_CTX_load_verify_locations(ctx, this->path_ctx, NULL))
         throw("SSL_CTX_load_verify_locations: Could not load trusted CA certificates.");

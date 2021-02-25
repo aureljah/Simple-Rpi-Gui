@@ -150,6 +150,25 @@ std::string Socket::read(size_t read_len)
     return (msg);
 }
 
+std::string Socket::readLine(size_t buffer_len)
+{
+    while (true)
+    {
+        this->buffer += this->read(buffer_len);
+
+        int idx_end = this->buffer.find("\r\n");
+        if (idx_end != std::string::npos)
+        {
+            std::string ret = this->buffer.substr(0, idx_end);
+            this->buffer = this->buffer.substr(0, idx_end + 2);
+
+            std::cout << "[DEBUG]: readLine will return size: " << ret.size() << "\n";
+            std::cout << "[DEBUG]: readLine will return saved buffer(size " << this->buffer.size() << "): " << this->buffer << "\n";
+            return ret;
+        }
+    }
+}
+
 SSL *Socket::getSocksslFd() const
 {	return (this->_ssl);	}
 

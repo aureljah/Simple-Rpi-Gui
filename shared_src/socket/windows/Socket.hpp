@@ -19,6 +19,7 @@ public:
 
     int read(void *msg, size_t len);
     std::string read(size_t read_len);
+    std::string readLine(size_t buffer_len);
     int write(const void *msg, size_t len);
     int write(const std::string& msg); // with '\r\n' at the end
 

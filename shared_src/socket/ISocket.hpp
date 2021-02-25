@@ -16,6 +16,7 @@ public:
 
     virtual int read(void *msg, size_t len) = 0;
     virtual std::string read(size_t read_len) = 0;
+    virtual std::string readLine(size_t buffer_len) = 0; // read until \r\n is found, keep excess in buffer for future use
     virtual int write(const void *msg, size_t len) = 0;
     virtual int write(const std::string& msg) = 0;
 

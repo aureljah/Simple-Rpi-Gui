@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string.h>
 #include <netinet/in.h>
+#include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -26,6 +27,7 @@ public:
 
     int read(void *msg, size_t len);
     std::string read(size_t read_len);
+    std::string readLine(size_t buffer_len);
     int write(const void *msg, size_t len);
     int write(const std::string& msg); // with '\r\n' at the end
 
@@ -41,4 +43,6 @@ private:
     struct sockaddr_in _sin;
     SSL *_ssl;
     OpensslWrapper *_openssl;
+
+    std::string buffer;
 };
