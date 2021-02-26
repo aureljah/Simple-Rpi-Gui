@@ -10,7 +10,7 @@
 #include <mutex>
 #include <map>
 #include "Socket.hpp" // OS specific before other !
-#include "OpensslWrapper.hpp"
+#include "../tools/serverApi.hpp"
 #include "connection.h"
 #include "live/modelive.h"
 
@@ -27,6 +27,7 @@ public:
     ~MainWindow();
 
     void startConnectWin();
+    void writeToDebugScreen(std::string msg, std::string type);
     void pingServeur(QString msg);
 
     void second_thread_test();
@@ -45,6 +46,8 @@ private slots:
 private:
     Ui::MainWindow *ui;
     ISocket *main_sock;
+    serverApi *server_api;
+
     modeLive *mode_live;
 
     //std::thread *t2;

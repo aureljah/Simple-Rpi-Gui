@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QTimer>
 #include <cmath>
+#include "../tools/serverApi.hpp"
 
 namespace Ui {
 class dynamicOutput;
@@ -18,7 +19,7 @@ class dynamicOutput : public QWidget
     //Q_PROPERTY(QString name READ name)
 
 public:
-    explicit dynamicOutput(int pin, QString name, QWidget *parent = nullptr);
+    explicit dynamicOutput(serverApi *server_api, int pin, QString name, QWidget *parent = nullptr);
     ~dynamicOutput();
 
     int getPin();
@@ -50,6 +51,7 @@ private slots:
     void on_pwm_spinBox_valueChanged(int arg1);
 
 private:
+    serverApi *server_api;
     int pin;
     QString name;
     Ui::dynamicOutput *ui;

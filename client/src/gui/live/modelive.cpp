@@ -1,6 +1,7 @@
 #include "modelive.h"
 
-modeLive::modeLive(QWidget *live_tab) : live_tab(live_tab)
+modeLive::modeLive(QWidget *live_tab, serverApi *server_api)
+    : live_tab(live_tab), server_api(server_api)
 {
     QWidget *widget = new QWidget();
 
@@ -77,7 +78,7 @@ void modeLive::addInputOutput(QString name, int pin, gpioSettingDialog::gpio_typ
         }
         else // add/create new output
         {
-            dyn_out = new dynamicOutput(pin, name);
+            dyn_out = new dynamicOutput(server_api, pin, name);
             QObject::connect(dyn_out, &dynamicOutput::live_output_editButton_clicked,
                              this, &modeLive::live_output_editButton_clicked);
             QObject::connect(dyn_out, &dynamicOutput::live_output_delButton_clicked,

@@ -1,8 +1,8 @@
 #include "dynamicoutput.h"
 #include "ui_dynamicoutput.h"
 
-dynamicOutput::dynamicOutput(int pin, QString name, QWidget *parent) :
-    QWidget(parent), pin(pin), name(name), ui(new Ui::dynamicOutput), value(0)
+dynamicOutput::dynamicOutput(serverApi *server_api, int pin, QString name, QWidget *parent) :
+    QWidget(parent), server_api(server_api), pin(pin), name(name), ui(new Ui::dynamicOutput), value(0)
 {
     qInfo() << "New dynamicOutput pin: " << pin << "\n";
     ui->setupUi(this);
@@ -22,6 +22,7 @@ dynamicOutput::dynamicOutput(int pin, QString name, QWidget *parent) :
 
 dynamicOutput::~dynamicOutput()
 {
+    this->server_api->liveDelPinServer(this->pin);
     delete ui;
 }
 
@@ -36,8 +37,12 @@ int dynamicOutput::getPin()
 }
 void dynamicOutput::setPin(int pin)
 {
+    int old_pin = this->pin;
     this->pin = pin;
     this->updateTitle();
+
+    this->server_api->liveDelPinServer(old_pin);
+    this->server_api->liveSetOutputServer(this->pin, this->value, this->name.toStdString());
 }
 
 QString dynamicOutput::getName()
@@ -49,6 +54,8 @@ void dynamicOutput::setName(QString name)
     this->name = name;
     this->setObjectName(name);
     this->updateTitle();
+
+    this->server_api->liveSetOutputServer(this->pin, this->value, this->name.toStdString());
 }
 
 void dynamicOutput::mouseDoubleClickEvent(QMouseEvent *event)
@@ -119,6 +126,8 @@ void dynamicOutput::updatePinValue(int new_value)
         ui->onButton->setChecked(false);
         ui->onButton->setAutoExclusive(true);
     }
+
+    this->server_api->liveSetOutputServer(this->pin, this->value, this->name.toStdString());
 }
 
 void dynamicOutput::on_onButton_clicked(bool checked)

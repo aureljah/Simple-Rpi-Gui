@@ -15,6 +15,7 @@
 #include <list>
 #include "dynamicoutput.h"
 #include "gpiosettingdialog.h"
+#include "../tools/serverApi.hpp"
 #include "../tools/tools.h"
 
 class modeLive : public QObject
@@ -22,7 +23,7 @@ class modeLive : public QObject
     Q_OBJECT
 
 public:
-    modeLive(QWidget *live_tab);
+    modeLive(QWidget *live_tab, serverApi *server_api);
 
     void addInputOutput(QString name, int pin, gpioSettingDialog::gpio_type type, QString old_name, int old_pin);
     void startGpioSettingDialog(gpioSettingDialog::gpio_type type, QString old_name = nullptr);
@@ -39,6 +40,7 @@ private slots:
 
 private:
     QWidget *live_tab;
+    serverApi *server_api;
 
     QVBoxLayout *vlayout;
     std::map<QString, dynamicOutput*> dyn_widgets;

@@ -9,8 +9,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     this->main_sock = new Socket("mycert.pem", OpensslWrapper::CLIENT);
+    this->server_api = new serverApi(this->main_sock);
+    QObject::connect(this->server_api, &serverApi::send_recv_server_msg,
+                     this, &MainWindow::writeToDebugScreen);
 
-    this->mode_live = new modeLive(ui->live_tab);
+    this->mode_live = new modeLive(ui->live_tab, this->server_api);
 
     this->startConnectWin();
 }
@@ -30,6 +33,25 @@ void MainWindow::startConnectWin()
 
     win->setAttribute(Qt::WA_DeleteOnClose);
     win->show();
+}
+
+void MainWindow::writeToDebugScreen(std::string msg, std::string type)
+{
+    QString full_msg = "";
+    if (type == "send")
+    {
+        full_msg = "[CLIENT]: " + QString::fromStdString(msg);
+    }
+    else if (type == "recv")
+    {
+        full_msg = "[SERVER]: " + QString::fromStdString(msg);
+    }
+    else
+        return;
+
+    lock_text_screen.lock();
+    ui->plainTextEdit->appendPlainText(full_msg);
+    lock_text_screen.unlock();
 }
 
 void MainWindow::pingServeur(QString msg)
@@ -89,6 +111,10 @@ void MainWindow::onConnected()
     //this->pingServeur("Yoyoyo !!!");
     QObject::connect(this, &MainWindow::new_serv_msg,
                      this, &MainWindow::onMsgFromServer);
+
+    // get status from server
+    // create mode
+    // (LIVE) create pins
 
     //std::thread t2(&MainWindow::second_thread_test, this);
     //t2.detach();

@@ -33,6 +33,8 @@ add_executable(${EXEC_NAME} src/main.cpp
 			../shared_src/socket/${ARCH}/Socket.hpp
                         src/tools/tools.cpp
                         src/tools/tools.h
+                        src/tools/serverApi.cpp
+                        src/tools/serverApi.hpp
                         src/gui/mainwindow.cpp
                         src/gui/mainwindow.h
                         src/gui/mainwindow.ui
