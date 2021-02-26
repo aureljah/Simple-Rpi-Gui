@@ -27,6 +27,21 @@ Example of response for STATUS:
         "mode LIVE active with 2 outputs and 1 input"
 
 
+# SETTING commend is used to set the settings on the server or mode
+SETTING <setting_name> <value>
+    stay_active (true | false)      # true by default
+
+    # possible responses #:
+        200 <setting_name> (true | false)
+
+Example of SETTING
+    SETTING
+        => will list all settings
+        response: 200 SETTING stay_active true
+    SETTING stay_active false
+        => set stay_active to false
+        response: 200
+
 
 # LIVE command is used to manage pin in Live mode with set and del #
 # Note: LIVE command will delete script mode and activate Live mode if not already active #

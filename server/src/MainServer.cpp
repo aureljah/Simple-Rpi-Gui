@@ -5,7 +5,7 @@
 #include <string>
 
 MainServer::MainServer()
-    : live_mode(nullptr)
+    : live_mode(nullptr), setting_stay_active(true)
 {
 
 }
@@ -62,6 +62,16 @@ std::string MainServer::parseCommand(std::string cmd)
     {
         i++;
         return this->getStatusCommand();
+    }
+    else if (cmd_array[i] == "SETTING")
+    {
+        i++;
+        if (cmd_array.size() <= i)
+            return this->getSettingCommand();
+        else if (cmd_array.size() > i + 1)
+            return this->setSettingCommand(cmd_array[i], cmd_array[i + 1]);
+        else
+            throw std::runtime_error("SETTING: missing parameters");
     }
     else if (cmd_array[i] == "LIVE")
     {
@@ -121,6 +131,32 @@ std::string MainServer::getStatusCommand()
     return status;
 }
 
+std::string MainServer::getSettingCommand()
+{
+    std::string settings = "SETTING";
+
+    settings += " stay_active ";
+    settings += this->boolToString(this->setting_stay_active);
+
+    return settings;
+}
+
+std::string MainServer::setSettingCommand(std::string setting, std::string value)
+{
+    std::string ret;
+    if (setting == "stay_active")
+    {
+        if (this->isBoolStringValid(value) == true)
+            this->setting_stay_active = this->stringToBool(value);
+        else
+            throw std::runtime_error("SETTING stay_active: invalid value");
+    }
+    else
+        throw std::runtime_error("SETTING: setting <" + setting + "> doesn't exist");
+
+    return ""; // OK
+}
+
 std::string MainServer::liveSetInputCommand(std::string cmd_pin, std::string cmd_name)
 {
     int pin = std::stoi(cmd_pin);
@@ -172,6 +208,36 @@ bool MainServer::useModeLive()
     return true;
 }
 
+bool MainServer::deleteAllMode()
+{
+    // del mode script
+    if (this->live_mode)
+    {
+        delete this->live_mode;
+        this->live_mode = nullptr;
+    }
+
+    return true;
+}
+
+std::string MainServer::boolToString(bool var)
+{
+    std::string str = "false";
+    if (var == true)
+        str = "true";
+
+    return str;
+}
+
+bool MainServer::stringToBool(std::string str)
+{
+    bool var = false;
+    if (str == "true")
+        var = true;
+
+    return var;
+}
+
 bool MainServer::isPinNumberValid(int pin)
 {
     if (pin < 2 || pin > 26)
@@ -196,6 +262,20 @@ bool MainServer::isNameValid(std::string name)
     return true;
 }
 
+bool MainServer::isBoolStringValid(std::string str_bool)
+{
+    if (str_bool == "true" || str_bool == "false")
+        return true;
+
+    return false;
+}
+
+void MainServer::onDisconnected()
+{
+    if (this->setting_stay_active == false)
+        this->deleteAllMode();
+}
+
 void MainServer::run(int port, std::string cert_path)
 {
     ISocket *sock = new Socket(cert_path, OpensslWrapper::SERVER);
@@ -204,7 +284,6 @@ void MainServer::run(int port, std::string cert_path)
         sock->bind(port);
         sock->listen(1);
 
-        //int count = 0;
         while(true)
         {
             std::cout << "INFO: Ready, Waiting client to connect...\n\n";
@@ -226,15 +305,13 @@ void MainServer::run(int port, std::string cert_path)
                         }
 
                         client->write(resp);
-
-                        //sleep(1);
-                        //count++;
                     }
                     catch(char const *msg) {
                         std::cout << "INFO: client disconnected ! - " << msg << "\n";
                         break;
                     }
                 }
+                this->onDisconnected();
                 delete client;
             }
         }
