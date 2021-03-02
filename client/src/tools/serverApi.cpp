@@ -101,6 +101,108 @@ std::string serverApi::sendToServer(std::string cmd)
     return serv_msg;
 }
 
+void serverApi::parseLiveStatus(std::vector<std::string> resp_array)
+{
+    size_t i = 2;
+    while (resp_array.size() > i)
+    {
+        bool input_cond = (resp_array[i] == "input" && resp_array.size() > (i + 2));
+        bool output_cond = (resp_array[i] == "output" && resp_array.size() > (i + 3));
+        if (input_cond || output_cond)
+        {
+            i++;
+            int pin = std::stoi(resp_array[i]);
+            i++;
+            int value = 0;
+            if (output_cond)
+            {
+                value = std::stoi(resp_array[i]);
+                i++;
+            }
+            std::string name = resp_array[i];
+            i++;
+
+            if (input_cond)
+                emit new_live_input(pin, name);
+            else if (output_cond)
+                emit new_live_output(pin, value, name);
+        }
+        else // invalid data
+            break;
+    }
+}
+
+
+/* API */
+bool serverApi::getServerStatus()
+{
+    std::string resp = this->sendToServer("STATUS");
+
+    std::vector<std::string> resp_array = this->splitStrToArray(resp);
+    if (this->checkBasicRespArray(resp_array, "getServerStatus") == false)
+        return false;
+
+    if (resp_array.size() >= 2)
+    {
+        if (resp_array[1] == "LIVE")
+            this->parseLiveStatus(resp_array);
+        //else if (resp_array[1] == "SCRIPT") // TODO
+        //else if (resp_array[1] == "NONE")
+    }
+    return true;
+}
+
+bool serverApi::getServerSetting()
+{
+    std::string resp = this->sendToServer("SETTING");
+
+    std::vector<std::string> resp_array = this->splitStrToArray(resp);
+    if (this->checkBasicRespArray(resp_array, "getServerStatus") == false)
+        return false;
+
+    if (resp_array.size() > 1 && resp_array[1] == "SETTING")
+    {
+        size_t i = 2;
+        while (resp_array.size() > i)
+        {
+            if (resp_array[i] == "stay_active" && resp_array.size() > (i + 1))
+            {
+                i++;
+                if (resp_array[i] == "true")
+                    emit stay_alive_setting(true);
+                else if (resp_array[i] == "false")
+                    emit stay_alive_setting(false);
+                else // invalid
+                    break;
+
+            }
+            else // invalid
+                break;
+        }
+    }
+    return true;
+}
+
+bool serverApi::setServerSetting(std::string setting, std::string value)
+{
+    std::string cmd = "SETTING";
+    if (setting == "stay_active")
+    {
+        cmd += " " + setting;
+        if (value == "true" || value == "false")
+            cmd += " " + value;
+        else
+            return false;
+    }
+    else
+        return false;
+
+    std::string resp = this->sendToServer(cmd);
+
+    std::vector<std::string> resp_array = this->splitStrToArray(resp);
+    return this->checkBasicRespArray(resp_array, "setServerSetting");
+}
+
 bool serverApi::liveSetInputServer(int pin, std::string name)
 {
     std::string cmd = "LIVE set input ";

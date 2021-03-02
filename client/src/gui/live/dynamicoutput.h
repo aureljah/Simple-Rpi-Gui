@@ -19,7 +19,7 @@ class dynamicOutput : public QWidget
     //Q_PROPERTY(QString name READ name)
 
 public:
-    explicit dynamicOutput(serverApi *server_api, int pin, QString name, QWidget *parent = nullptr);
+    explicit dynamicOutput(serverApi *server_api, int pin, QString name, int value, QWidget *parent = nullptr);
     ~dynamicOutput();
 
     int getPin();

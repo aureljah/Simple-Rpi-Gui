@@ -25,7 +25,7 @@ class modeLive : public QObject
 public:
     modeLive(QWidget *live_tab, serverApi *server_api);
 
-    void addInputOutput(QString name, int pin, gpioSettingDialog::gpio_type type, QString old_name, int old_pin);
+    void addInputOutput(QString name, int pin, gpioSettingDialog::gpio_type type, QString old_name, int old_pin, int value = 0);
     void startGpioSettingDialog(gpioSettingDialog::gpio_type type, QString old_name = nullptr);
 
     std::list<QString> getUsedName(QString name_ignored = nullptr);
@@ -37,6 +37,10 @@ private slots:
     void live_output_delButton_clicked(QString name);
     void live_output_upButton_clicked(QString name);
     void live_output_downButton_clicked(QString name);
+
+public slots:
+    void add_input(int pin, std::string name);
+    void add_output(int pin, int value, std::string name);
 
 private:
     QWidget *live_tab;

@@ -1,7 +1,7 @@
 #include "dynamicoutput.h"
 #include "ui_dynamicoutput.h"
 
-dynamicOutput::dynamicOutput(serverApi *server_api, int pin, QString name, QWidget *parent) :
+dynamicOutput::dynamicOutput(serverApi *server_api, int pin, QString name, int value, QWidget *parent) :
     QWidget(parent), server_api(server_api), pin(pin), name(name), ui(new Ui::dynamicOutput), value(0)
 {
     qInfo() << "New dynamicOutput pin: " << pin << "\n";
@@ -17,7 +17,7 @@ dynamicOutput::dynamicOutput(serverApi *server_api, int pin, QString name, QWidg
     ui->pwm_spinBox->setSingleStep(1);
     ui->pwm_slider->setRange(0, 100);
 
-    this->updatePinValue(0);
+    this->updatePinValue(value);
 }
 
 dynamicOutput::~dynamicOutput()

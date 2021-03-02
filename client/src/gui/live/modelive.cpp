@@ -38,7 +38,7 @@ void modeLive::startGpioSettingDialog(gpioSettingDialog::gpio_type type, QString
     win->show();
 }
 
-void modeLive::addInputOutput(QString name, int pin, gpioSettingDialog::gpio_type type, QString old_name, int old_pin)
+void modeLive::addInputOutput(QString name, int pin, gpioSettingDialog::gpio_type type, QString old_name, int old_pin, int value)
 {
     std::list<QString> used_name = this->getUsedName(old_name);
     if (std::find(used_name.begin(), used_name.end(), name) != used_name.end())
@@ -78,7 +78,7 @@ void modeLive::addInputOutput(QString name, int pin, gpioSettingDialog::gpio_typ
         }
         else // add/create new output
         {
-            dyn_out = new dynamicOutput(server_api, pin, name);
+            dyn_out = new dynamicOutput(server_api, pin, name, value);
             QObject::connect(dyn_out, &dynamicOutput::live_output_editButton_clicked,
                              this, &modeLive::live_output_editButton_clicked);
             QObject::connect(dyn_out, &dynamicOutput::live_output_delButton_clicked,
@@ -175,4 +175,13 @@ void modeLive::live_output_delButton_clicked(QString name)
             break;
         }
     }
+}
+
+void modeLive::add_input(int pin, std::string name)
+{
+    this->addInputOutput(QString::fromStdString(name), pin, gpioSettingDialog::INPUT, nullptr, -1);
+}
+void modeLive::add_output(int pin, int value, std::string name)
+{
+    this->addInputOutput(QString::fromStdString(name), pin, gpioSettingDialog::OUTPUT, nullptr, -1, value);
 }

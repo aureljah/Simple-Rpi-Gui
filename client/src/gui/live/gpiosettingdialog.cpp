@@ -86,7 +86,7 @@ void gpioSettingDialog::on_buttonBox_accepted()
         if (this->type == gpio_type::OUTPUT)
         {
             emit dialog_accepted(ui->lineEdit->text(), ui->comboBox->currentText().toInt(),
-                                 this->type, this->old_name, this->old_pin);
+                                 this->type, this->old_name, this->old_pin, 0);
         }
         this->close();
     }

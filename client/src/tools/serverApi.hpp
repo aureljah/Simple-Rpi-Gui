@@ -23,24 +23,29 @@ public:
     ~serverApi();
 
 public:
-    //void setInterceptor(void (*interceptor)(std::string, std::string) = nullptr);
-
     /* API */
-    //std::string getServerStatus();
-    //std::string getServerSetting();
-    //bool setServerSetting(std::string setting, std::string value);
+    bool getServerStatus();
+    bool getServerSetting();
+    bool setServerSetting(std::string setting, std::string value);
 
     bool liveSetInputServer(int pin, std::string name);
     bool liveSetOutputServer(int pin, int value, std::string name);
     bool liveDelPinServer(int pin);
 
 signals:
+    void new_live_input(int, std::string);
+    void new_live_output(int, int, std::string);
+
+    void stay_alive_setting(bool);
+
     void send_recv_server_msg(std::string, std::string);
 
 private:
     std::string sendToServer(std::string cmd);
     std::vector<std::string> splitStrToArray(std::string cmd);
     bool checkBasicRespArray(std::vector<std::string> resp_array, std::string fct_name);
+
+    void parseLiveStatus(std::vector<std::string> resp_array);
 
 private:
     ISocket *server_socket;

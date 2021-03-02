@@ -32,7 +32,7 @@ public:
     bool checkInput();
 
 signals:
-    void dialog_accepted(QString name, int pin, gpio_type type, QString old_name, int old_pin);
+    void dialog_accepted(QString name, int pin, gpio_type type, QString old_name, int old_pin, int value);
 
 private slots:
     void on_buttonBox_accepted();

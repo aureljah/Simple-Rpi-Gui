@@ -49,7 +49,14 @@
         <string>Main tab</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_4">
-        <item row="1" column="0">
+        <item row="4" column="1">
+         <widget class="QPushButton" name="live_add_input_pushButton">
+          <property name="text">
+           <string>Add Input</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
          <widget class="QScrollArea" name="live_output_scrollArea">
           <property name="widgetResizable">
            <bool>true</bool>
@@ -60,27 +67,13 @@
              <x>0</x>
              <y>0</y>
              <width>525</width>
-             <height>478</height>
+             <height>448</height>
             </rect>
            </property>
           </widget>
          </widget>
         </item>
-        <item row="2" column="0">
-         <widget class="QPushButton" name="live_add_output_pushButton">
-          <property name="text">
-           <string>Add Ouput</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QPushButton" name="live_add_input_pushButton">
-          <property name="text">
-           <string>Add Input</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
+        <item row="3" column="1">
          <widget class="QScrollArea" name="live_input_scrollArea">
           <property name="widgetResizable">
            <bool>true</bool>
@@ -91,13 +84,13 @@
              <x>0</x>
              <y>0</y>
              <width>524</width>
-             <height>478</height>
+             <height>448</height>
             </rect>
            </property>
           </widget>
          </widget>
         </item>
-        <item row="0" column="0">
+        <item row="2" column="0">
          <widget class="QLabel" name="live_output_label">
           <property name="layoutDirection">
            <enum>Qt::LeftToRight</enum>
@@ -110,13 +103,27 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
+        <item row="2" column="1">
          <widget class="QLabel" name="live_input_label">
           <property name="text">
            <string>Input</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QPushButton" name="live_add_output_pushButton">
+          <property name="text">
+           <string>Add Ouput</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QCheckBox" name="settingStayActive">
+          <property name="text">
+           <string>Server stay active after deconnection</string>
           </property>
          </widget>
         </item>
