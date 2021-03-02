@@ -10,10 +10,6 @@ LiveMode::LiveMode()
 
 LiveMode::~LiveMode()
 {
-    // delete everything
-    
-    delete this->rpi;
-    
     // del all inputs
     for(std::map<int, LivePin*>::iterator it = this->inputs.begin(); it != this->inputs.end(); it++)
     {
@@ -30,6 +26,7 @@ LiveMode::~LiveMode()
     }
     this->outputs.clear();
 
+    delete this->rpi;
 }
 
 std::string LiveMode::getStatus()
