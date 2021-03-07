@@ -45,6 +45,9 @@ gpioSettingDialog::gpioSettingDialog(std::list<QString> used_name, std::list<int
         for (int num = 1 ; num < 40 ; num++)
         {
             QString default_name = "Output " + QString::number(num);
+            if (type == gpio_type::INPUT)
+                default_name = "Input " + QString::number(num);
+
             if (std::find(this->used_name.begin(), this->used_name.end(), default_name) == this->used_name.end())
             {
                 ui->lineEdit->setText(default_name);
@@ -83,11 +86,8 @@ void gpioSettingDialog::on_buttonBox_accepted()
 {
     if (this->checkInput() == true)
     {
-        if (this->type == gpio_type::OUTPUT)
-        {
-            emit dialog_accepted(ui->lineEdit->text(), ui->comboBox->currentText().toInt(),
+        emit dialog_accepted(ui->lineEdit->text(), ui->comboBox->currentText().toInt(),
                                  this->type, this->old_name, this->old_pin, 0);
-        }
         this->close();
     }
 }

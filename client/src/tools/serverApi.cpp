@@ -15,7 +15,7 @@ serverApi::~serverApi()
 std::vector<std::string> serverApi::splitStrToArray(std::string cmd)
 {
     std::vector<std::string> array;
-    
+
     size_t idx_start = 0;
     size_t idx_end = cmd.find(" ");
     while (idx_end != std::string::npos && idx_start < cmd.size())
@@ -101,9 +101,9 @@ std::string serverApi::sendToServer(std::string cmd)
     return serv_msg;
 }
 
-void serverApi::parseLiveStatus(std::vector<std::string> resp_array)
+void serverApi::parseLiveStatus(std::vector<std::string> resp_array, size_t start_idx)
 {
-    size_t i = 2;
+    size_t i = start_idx;
     while (resp_array.size() > i)
     {
         bool input_cond = (resp_array[i] == "input" && resp_array.size() > (i + 2));
@@ -145,7 +145,7 @@ bool serverApi::getServerStatus()
     if (resp_array.size() >= 2)
     {
         if (resp_array[1] == "LIVE")
-            this->parseLiveStatus(resp_array);
+            this->parseLiveStatus(resp_array, 2);
         //else if (resp_array[1] == "SCRIPT") // TODO
         //else if (resp_array[1] == "NONE")
     }
@@ -210,7 +210,7 @@ bool serverApi::liveSetInputServer(int pin, std::string name)
     cmd += " \"" + name + "\"";
 
     std::string resp = this->sendToServer(cmd);
-    
+
     std::vector<std::string> resp_array = this->splitStrToArray(resp);
     return this->checkBasicRespArray(resp_array, "liveSetInputServer");
 }
@@ -223,7 +223,7 @@ bool serverApi::liveSetOutputServer(int pin, int value, std::string name)
     cmd += " \"" + name + "\"";
 
     std::string resp = this->sendToServer(cmd);
-    
+
     std::vector<std::string> resp_array = this->splitStrToArray(resp);
     return this->checkBasicRespArray(resp_array, "liveSetOutputServer");
 }
@@ -234,7 +234,7 @@ bool serverApi::liveDelPinServer(int pin)
     cmd += std::to_string(pin);
 
     std::string resp = this->sendToServer(cmd);
-    
+
     std::vector<std::string> resp_array = this->splitStrToArray(resp);
     return this->checkBasicRespArray(resp_array, "liveDelPinServer");
 }

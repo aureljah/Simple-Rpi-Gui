@@ -46,6 +46,9 @@ add_executable(${EXEC_NAME} src/main.cpp
                         src/gui/live/dynamicoutput.cpp
                         src/gui/live/dynamicoutput.h
                         src/gui/live/dynamicoutput.ui
+                        src/gui/live/dynamicinput.cpp
+                        src/gui/live/dynamicinput.h
+                        src/gui/live/dynamicinput.ui
                         src/gui/live/gpiosettingdialog.cpp
                         src/gui/live/gpiosettingdialog.h
                         src/gui/live/gpiosettingdialog.ui

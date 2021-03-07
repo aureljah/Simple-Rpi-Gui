@@ -20,6 +20,8 @@ MainWindow::MainWindow(QWidget *parent) :
                      this->mode_live, &modeLive::add_input);
     QObject::connect(this->server_api, &serverApi::new_live_output,
                      this->mode_live, &modeLive::add_output);
+    QObject::connect(this->server_api, &serverApi::input_value_changed,
+                     this->mode_live, &modeLive::update_input_value);
 
 
     this->startConnectWin();
@@ -115,15 +117,11 @@ void MainWindow::onMsgFromServer(QString msg)
 void MainWindow::onConnected()
 {
     this->show();
-    //this->pingServeur("Yoyoyo !!!");
     QObject::connect(this, &MainWindow::new_serv_msg,
                      this, &MainWindow::onMsgFromServer);
 
     this->server_api->getServerStatus();
     this->server_api->getServerSetting();
-
-    //std::thread t2(&MainWindow::second_thread_test, this);
-    //t2.detach();
 }
 
 /* send ping/msg to server boutton */

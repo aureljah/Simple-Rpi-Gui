@@ -23,6 +23,10 @@ public:
     ~serverApi();
 
 public:
+    std::string getServerIp() { return this->server_socket->getIpStr(); };
+    int getServerPort() { return this->server_socket->getPort(); };
+    int getInputReceiverPort() { return (this->server_socket->getPort() + 1); };
+
     /* API */
     bool getServerStatus();
     bool getServerSetting();
@@ -31,10 +35,12 @@ public:
     bool liveSetInputServer(int pin, std::string name);
     bool liveSetOutputServer(int pin, int value, std::string name);
     bool liveDelPinServer(int pin);
+    void liveParseInputReceiver(std::string data);
 
 signals:
     void new_live_input(int, std::string);
     void new_live_output(int, int, std::string);
+    void input_value_changed(int, int);
 
     void stay_alive_setting(bool);
 
@@ -45,7 +51,7 @@ private:
     std::vector<std::string> splitStrToArray(std::string cmd);
     bool checkBasicRespArray(std::vector<std::string> resp_array, std::string fct_name);
 
-    void parseLiveStatus(std::vector<std::string> resp_array);
+    void parseLiveStatus(std::vector<std::string> resp_array, size_t start_idx);
 
 private:
     ISocket *server_socket;
