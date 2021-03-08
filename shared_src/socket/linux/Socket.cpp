@@ -1,8 +1,11 @@
 #include "Socket.hpp"
+#include <bits/stdint-uintn.h>
 #include <cstddef>
+#include <cstdio>
+#include <netinet/in.h>
 
 Socket::Socket(std::string path_cert, OpensslWrapper::socketType type)
-    : _fd(0), _sin(), _ssl(NULL)
+    : _fd(0), _sin(), _ssl(NULL), port(0)
 {
     this->_openssl = new OpensslWrapper(path_cert, type);
     //struct protoent* pe;
@@ -15,7 +18,7 @@ Socket::Socket(std::string path_cert, OpensslWrapper::socketType type)
 }
 
 Socket::Socket(int fd, const struct sockaddr_in& sin, SSL *ssl, OpensslWrapper* openssl)
-    : _fd(fd), _sin(sin), _ssl(ssl), _openssl(openssl)
+    : _fd(fd), _sin(sin), _ssl(ssl), _openssl(openssl), port(0)
 {
     int sin_size = sizeof(this->_sin);
     getsockname(this->_fd, reinterpret_cast<struct sockaddr*>(&this->_sin), reinterpret_cast<socklen_t*>(&sin_size));
@@ -34,10 +37,11 @@ void Socket::connect(std::string ip, int port)
     //associate(ip.data(), port, ::connect);
     this->_sin.sin_port = htons(port);
     this->_sin.sin_addr.s_addr = inet_addr(ip.c_str());
-    if (!::connect(_fd, reinterpret_cast<struct sockaddr*>(&this->_sin), sizeof(this->_sin)))
+    if (!::connect(this->_fd, reinterpret_cast<struct sockaddr*>(&this->_sin), sizeof(this->_sin)))
     {
+        this->port = htons(port);
         int sin_size = sizeof(this->_sin);
-        getsockname(_fd, reinterpret_cast<struct sockaddr*>(&this->_sin), reinterpret_cast<socklen_t*>(&sin_size));
+        getsockname(this->_fd, reinterpret_cast<struct sockaddr*>(&this->_sin), reinterpret_cast<socklen_t*>(&sin_size));
 
         this->_ssl = this->_openssl->newSSL(this->_fd);
         if ((ret = SSL_connect(this->_ssl)) == -1)
@@ -182,17 +186,20 @@ std::string Socket::getIpStr() const
 
 uint32_t Socket::getIpInt() const
 {
-    uint32_t i;
+    uint32_t ip;
 
-    i = static_cast<uint32_t> (this->_sin.sin_addr.s_addr);
-    return (i);
+    ip = htonl(this->_sin.sin_addr.s_addr);
+    return (ip);
 }
 
 uint16_t Socket::getPort() const
 {
     uint16_t port;
 
-    port = static_cast<uint16_t>(this->_sin.sin_port);
+    port = ntohs(this->port);
+    if (port < 1)
+        port = ntohs(this->_sin.sin_port);
+
     return (port);
 }
 

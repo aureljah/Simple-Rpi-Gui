@@ -43,6 +43,7 @@ private:
     struct sockaddr_in _sin;
     SSL *_ssl;
     OpensslWrapper *_openssl;
+    u_int16_t port; // to save the port used with connect
 
     std::string buffer;
 };
