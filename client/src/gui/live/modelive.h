@@ -20,7 +20,7 @@
 #include "../tools/serverApi.hpp"
 #include "../tools/tools.h"
 
-# define INPUT_POLL_TIME 5000
+# define INPUT_POLL_TIME 2000
 
 class modeLive : public QObject
 {
@@ -38,6 +38,8 @@ public:
 
 private:
     void server_input_receiver();
+    dynamicOutput *find_dyn_out(QString name);
+    dynamicInput *find_dyn_in(QString name);
 
 private slots:
     void live_output_editButton_clicked(QString name);

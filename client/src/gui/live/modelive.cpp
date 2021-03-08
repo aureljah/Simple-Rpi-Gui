@@ -51,18 +51,18 @@ void modeLive::server_input_receiver()
     ISocket *input_sock = new Socket("mycert.pem", OpensslWrapper::CLIENT);
     while (will_exit == false) {
         try {
+            std::cout << "server_input_receiver: try to connect on " << this->server_api->getServerIp() << " : " << this->server_api->getInputReceiverPort() << "\n";
             input_sock->connect(this->server_api->getServerIp(), this->server_api->getInputReceiverPort());
             qInfo() << "server_input_receiver: CONNECTED\n";
 
             while (will_exit == false) {
                 try {
-                    //std::string data = input_sock->readLine(4096);
-                    //this->server_api->liveParseInputReceiver(data);
-                    qInfo() << "server_input_receiver: RUNNING/READING (read disabled)\n";
-                    systemcall::sys_usleep(INPUT_POLL_TIME);
+                    std::string data = input_sock->readLine(4096);
+                    this->server_api->liveParseInputReceiver(data);
                 }
                 catch(char const *msg) {
                     qInfo() << "Error read server_input_receiver: " << msg << "\n";
+                    break;
                 }
 
                 this->input_thread_mutex.lock();
@@ -98,12 +98,46 @@ void modeLive::server_input_receiver()
     delete this_thread;
 }
 
+dynamicOutput *modeLive::find_dyn_out(QString name)
+{
+    for(std::map<QString, dynamicOutput*>::iterator it = this->dyn_o_widgets.begin(); it != this->dyn_o_widgets.end(); it++)
+    {
+        if (it->first == name)
+        {
+            return it->second;
+        }
+    }
+    return nullptr;
+}
+dynamicInput *modeLive::find_dyn_in(QString name)
+{
+    for(std::map<QString, dynamicInput*>::iterator it = this->dyn_i_widgets.begin(); it != this->dyn_i_widgets.end(); it++)
+    {
+        if (it->first == name)
+        {
+            return it->second;
+        }
+    }
+    return nullptr;
+}
+
 void modeLive::startGpioSettingDialog(gpioSettingDialog::gpio_type type, QString old_name)
 {
     int old_pin = -1;
     if (old_name != nullptr)
     {
-        old_pin = this->dyn_o_widgets[old_name]->getPin();
+        if (type == gpioSettingDialog::OUTPUT)
+        {
+            dynamicOutput *out = this->find_dyn_out(old_name);
+            if (out)
+                old_pin = out->getPin();
+        }
+        else if (type == gpioSettingDialog::INPUT)
+        {
+            dynamicInput *in = this->find_dyn_in(old_name);
+            if (in)
+                old_pin = in->getPin();
+        }
     }
     auto win = new gpioSettingDialog(this->getUsedName(old_name), this->getUsedPins(old_pin), type, old_name, old_pin, this->live_tab);
 
