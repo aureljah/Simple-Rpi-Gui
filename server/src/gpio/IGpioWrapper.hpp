@@ -14,4 +14,5 @@ public:
 
     virtual void writeGpioOutput(int pin, int value) = 0; // write/set pin value (value between 0 and 100)
     virtual int readGpioInput(int pin) = 0; // read a pin (ret 0 or 1)
+    virtual int readGpioInput(int pin, int old_value) = 0; // simulate read a pin
 };

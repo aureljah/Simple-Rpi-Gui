@@ -20,8 +20,5 @@ public:
 
     void writeGpioOutput(int pin, int value); // write/set pin value (value between 0 and 100)
     int readGpioInput(int pin); // read a pin (ret 0 or 1)
-
-private:
-    int last_read_value = 0;
-
+    int readGpioInput(int pin, int old_value); // simulate read a pin
 };

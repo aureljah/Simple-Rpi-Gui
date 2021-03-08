@@ -27,14 +27,17 @@ void GpioWrapper::writeGpioOutput(int pin, int value) {
 
 int GpioWrapper::readGpioInput(int pin) {
     // gpioRead()
-    if (this->last_read_value == 0) {
-        this->last_read_value = 1;
-    }
-    else {
-        this->last_read_value = 0;
-    }
-    int value = this->last_read_value;
-
-    std::cout << "[GPIO]: Reading pin " << pin << " value = " << value << "\n";
+    int value = 42;
+    //std::cout << "[GPIO]: Reading pin " << pin << " value = " << value << "\n";
     return value;
+}
+
+int GpioWrapper::readGpioInput(int pin, int old_value) {
+    // gpioRead()
+    old_value += 5;
+    if (old_value > 100)
+        old_value -= 100;
+
+    //std::cout << "[GPIO]: Reading pin " << pin << " value = " << old_value << "\n";
+    return old_value;
 }
