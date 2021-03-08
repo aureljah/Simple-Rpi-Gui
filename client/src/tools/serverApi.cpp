@@ -132,6 +132,18 @@ void serverApi::parseLiveStatus(std::vector<std::string> resp_array, size_t star
     }
 }
 
+void serverApi::liveParseInputReceiver(std::string cmd)
+{
+    emit send_recv_server_msg(cmd, "recv");
+    std::vector<std::string> resp_array = this->splitStrToArray(cmd);
+
+    if (resp_array.size() > 2 && resp_array[0] == "input")
+    {
+        int pin = std::stoi(resp_array[1]);
+        int value = std::stoi(resp_array[2]);
+        emit input_value_changed(pin, value);
+    }
+}
 
 /* API */
 bool serverApi::getServerStatus()

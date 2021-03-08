@@ -24,8 +24,8 @@ public:
 
 public:
     std::string getServerIp() { return this->server_socket->getIpStr(); };
-    int getServerPort() { return this->server_socket->getPort(); };
-    int getInputReceiverPort() { return (this->server_socket->getPort() + 1); };
+    int getServerPort() { return (this->server_socket->getPort()); };
+    int getInputReceiverPort() { return (this->getServerPort() + 1); };
 
     /* API */
     bool getServerStatus();

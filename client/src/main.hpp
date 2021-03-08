@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <string>
 #include <exception>
 #include "Systemcall.hpp"
 #include "Socket.hpp" // OS specific before other !
