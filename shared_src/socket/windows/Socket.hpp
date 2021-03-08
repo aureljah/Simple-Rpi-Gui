@@ -1,6 +1,9 @@
 #pragma once
 
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
 #include <string.h>
+#include <sys/types.h>
 #include <winsock2.h>
 #include "ASocket.hpp"
 #include "ISocket.hpp"
@@ -35,4 +38,9 @@ public:
     struct sockaddr_in _sin;
 	SSL *_ssl;
 	OpensslWrapper *_openssl;
+
+	uint16_t port; // to save the port used with connect
+	std::string ip;
+
+    std::string buffer;
 };

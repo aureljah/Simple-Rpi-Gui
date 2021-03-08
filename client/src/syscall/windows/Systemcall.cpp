@@ -1,9 +1,9 @@
 #include "Systemcall.hpp"
 #include <Windows.h>
 
-namespace syscall
+namespace systemcall
 {
-	void usleep(int millisec)
+	void sys_usleep(int millisec)
 	{
 		Sleep(millisec);
 	}
