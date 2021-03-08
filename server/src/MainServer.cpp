@@ -203,7 +203,7 @@ bool MainServer::useModeLive()
 {
     // del mode script if active
     if (this->live_mode == nullptr)
-        this->live_mode = new LiveMode();
+        this->live_mode = new LiveMode(this->base_port);
 
     return true;
 }
@@ -283,6 +283,7 @@ void MainServer::run(int port, std::string cert_path)
     try {
         sock->bind(port);
         sock->listen(1);
+        this->base_port = port;
 
         while(true)
         {

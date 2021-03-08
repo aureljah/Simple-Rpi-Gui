@@ -32,7 +32,7 @@ std::string LivePin::getName() {
 
 int LivePin::getValue() {
     if (this->type == GPIO_TYPE::INPUT) {
-        this->value = this->rpi->readGpioInput(this->pin);
+        this->value = this->rpi->readGpioInput(this->pin, this->value);
     }
     return this->value;
 }

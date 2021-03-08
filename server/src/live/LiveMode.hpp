@@ -5,16 +5,20 @@
 #include "../gpio/IGpioWrapper.hpp"
 #include "GpioWrapper.hpp"
 #include "LivePin.hpp"
+#include <cmath>
 #include <iostream>
 #include <exception>
 #include <string>
 #include <thread>
+#include <csignal>
 #include <map>
+
+#define DEFAULT_MONITOR_POLL_TIME 500
 
 class LiveMode
 {
 public:
-    LiveMode();
+    LiveMode(int base_port);
     ~LiveMode();
 
 public:
@@ -25,12 +29,15 @@ public:
     std::string delPin(int pin);
 
 private:
-    // thread/socket to read all output ?
+    void input_monitor(int base_port);
 
 private:
     IGpioWrapper *rpi;
 
+    std::thread *input_monitor_thread;
+    bool input_monitor_running;
+    int monitor_poll_time;
+
     std::map<int, LivePin*> outputs;
     std::map<int, LivePin*> inputs;
-
 };

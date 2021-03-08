@@ -1,11 +1,16 @@
 #include "LiveMode.hpp"
 #include "LivePin.hpp"
+#include <bits/types/struct_timeval.h>
+#include <csignal>
+#include <cstdio>
 #include <string>
 
-LiveMode::LiveMode()
+LiveMode::LiveMode(int base_port)
+    : input_monitor_running(true), monitor_poll_time(DEFAULT_MONITOR_POLL_TIME)
 {
     // get client socket
     this->rpi = new GpioWrapper();
+    this->input_monitor_thread = new std::thread(&LiveMode::input_monitor, this, base_port);
 }
 
 LiveMode::~LiveMode()
@@ -17,7 +22,7 @@ LiveMode::~LiveMode()
         delete tmp;
     }
     this->inputs.clear();
-    
+
     // del all outputs
     for(std::map<int, LivePin*>::iterator it = this->outputs.begin(); it != this->outputs.end(); it++)
     {
@@ -26,6 +31,9 @@ LiveMode::~LiveMode()
     }
     this->outputs.clear();
 
+    this->input_monitor_running = false;
+    this->input_monitor_thread->join();
+    delete this->input_monitor_thread;
     delete this->rpi;
 }
 
@@ -105,4 +113,61 @@ std::string LiveMode::delPin(int pin)
         delete old_pin;
     }
     return ""; // OK
+}
+
+void LiveMode::input_monitor(int base_port)
+{
+  ISocket *sock = new Socket("mycert.pem", OpensslWrapper::SERVER);
+  ISocket *client = NULL;
+  try {
+    sock->bind(base_port + 1);
+    sock->listen(1);
+
+    std::cout << "[INFO]: input_monitor: Ready, Waiting client to connect...\n\n";
+    while(this->input_monitor_running)
+    {
+        fd_set rfds;
+        FD_ZERO(&rfds);
+        FD_SET(sock->getSockFd(), &rfds);
+        struct timeval tv;
+        if (this->monitor_poll_time > 999)
+            tv.tv_sec = floor(this->monitor_poll_time / 1000);
+        else
+            tv.tv_sec = 0;
+        tv.tv_usec = floor(this->monitor_poll_time % 1000) * 1000;
+
+        int fd_ready = select(sock->getSockFd() + 1, &rfds, NULL, NULL, &tv);
+        //std::cout << "select returned: " << fd_ready << "\n\n";
+
+        if (fd_ready == -1)
+            perror("select");
+        else if (fd_ready > 0 && (client = sock->accept()) != NULL)
+        {
+            while (this->input_monitor_running)
+            {
+                try {
+                    for(std::map<int, LivePin*>::iterator it = this->inputs.begin(); it != this->inputs.end(); it++)
+                    {
+                        std::string msg = "input ";
+                        msg += std::to_string(it->second->getPin());
+                        msg += " ";
+                        msg += std::to_string(it->second->getValue());
+                        client->write(msg);
+                    }
+                    if (this->input_monitor_running)
+                        usleep(this->monitor_poll_time * 1000);
+                }
+                catch(char const *msg) {
+                    std::cout << "[INFO]: input_monitor: client disconnected ! - " << msg << "\n";
+                    break;
+                }
+            }
+            delete client;
+        }
+    }
+  }
+  catch(char const *msg) {
+    std::cerr << "Error input_monitor: " << msg << "\n";
+  }
+  delete sock;
 }
