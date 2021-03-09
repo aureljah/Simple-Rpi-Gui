@@ -1,6 +1,5 @@
 #include "LiveMode.hpp"
 #include "LivePin.hpp"
-#include <bits/types/struct_timeval.h>
 #include <csignal>
 #include <cstdio>
 #include <string>
