@@ -6,7 +6,7 @@ RM = rm -rf
 
 NAME = server
 
-LDFLAGS = -L. -L./ -L/usr/lib/x86_64-linux-gnu -lssl -lpthread
+LDFLAGS = -L. -L./ -L/usr/lib/x86_64-linux-gnu -lssl -lpthread -lcrypto
 
 CFLAGS = -Wall -O3
 
@@ -35,7 +35,7 @@ debug:
 	$(CXX) $(CFLAGS) -g $(SRC) $(TEST_SRC) $(HDR) $(TEST_HDR) -o $(NAME) $(LDFLAGS)
 
 rpi:
-	$(CXX) $(CFLAGS) $(SRC) $(RPI_SRC) $(HDR) $(RPI_HDR) -o $(NAME) $(LDFLAGS)
+	$(CXX) $(CFLAGS) $(SRC) $(RPI_SRC) $(HDR) $(RPI_HDR) -o $(NAME) $(LDFLAGS) -lpigpio -lrt
 
 clean:
 	$(RM) $(NAME)

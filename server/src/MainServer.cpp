@@ -288,7 +288,15 @@ void MainServer::run(int port, std::string cert_path)
         while(true)
         {
             std::cout << "INFO: Ready, Waiting client to connect...\n\n";
-            if ((client = sock->accept()) != NULL)
+            try {
+                client = sock->accept();
+            }
+            catch(char const *msg) {
+                std::cerr << "Error: " << msg << "\n";
+                client = NULL;
+                continue;
+            }
+            if (client != NULL)
             {
                 while (true)
                 {
