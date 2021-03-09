@@ -190,13 +190,13 @@ std::string Socket::getIpStr() const
     return (str);
 }
 
-uint32_t Socket::getIpInt() const
+/*uint32_t Socket::getIpInt() const
 {
     uint32_t i;
 
     i = static_cast<uint32_t> (this->_sin.sin_addr.s_addr);
     return (i);
-}
+}*/
 
 uint16_t Socket::getPort() const
 {

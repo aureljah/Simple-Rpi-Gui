@@ -5,7 +5,7 @@
 #include <netinet/in.h>
 
 Socket::Socket(std::string path_cert, OpensslWrapper::socketType type)
-    : _fd(0), _sin(), _ssl(NULL), port(0)
+    : _fd(0), _sin(), _ssl(NULL), port(0), ip("")
 {
     this->_openssl = new OpensslWrapper(path_cert, type);
     //struct protoent* pe;
@@ -40,6 +40,7 @@ void Socket::connect(std::string ip, int port)
     if (!::connect(this->_fd, reinterpret_cast<struct sockaddr*>(&this->_sin), sizeof(this->_sin)))
     {
         this->port = htons(port);
+        this->ip = ip;
         int sin_size = sizeof(this->_sin);
         getsockname(this->_fd, reinterpret_cast<struct sockaddr*>(&this->_sin), reinterpret_cast<socklen_t*>(&sin_size));
 
@@ -89,7 +90,7 @@ ISocket* Socket::accept()
     cssl = this->_openssl->newSSL(cfd);
     if ((SSL_accept(cssl)) <= 0) {
         SSL_get_error(cssl, ret);
-        //ERR_print_errors_fp(stdout);
+        ERR_print_errors_fp(stderr);
         throw("SSL_accept");
     }
     
@@ -180,17 +181,19 @@ std::string Socket::getIpStr() const
 {
     std::string str;
 
-    str = inet_ntoa(this->_sin.sin_addr);
+    str = this->ip;
+    if (ip.empty())
+        str = inet_ntoa(this->_sin.sin_addr);
     return (str);
 }
 
-uint32_t Socket::getIpInt() const
+/*uint32_t Socket::getIpInt() const
 {
     uint32_t ip;
 
     ip = htonl(this->_sin.sin_addr.s_addr);
     return (ip);
-}
+}*/
 
 uint16_t Socket::getPort() const
 {

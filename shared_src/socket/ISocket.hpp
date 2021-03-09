@@ -24,6 +24,6 @@ public:
     virtual OpensslWrapper *getOpensslWrapperPtr() const = 0;
     virtual int getSockFd() const = 0;
     virtual std::string getIpStr() const = 0;
-    virtual uint32_t getIpInt() const = 0;
+    //virtual uint32_t getIpInt() const = 0;
     virtual uint16_t getPort() const = 0;
 };

@@ -30,7 +30,7 @@ public:
 	OpensslWrapper *getOpensslWrapperPtr() const;
     int getSockFd() const;
     std::string getIpStr() const;
-    uint32_t getIpInt() const;
+    //uint32_t getIpInt() const;
     uint16_t getPort() const;
 
 public:
