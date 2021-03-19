@@ -6,13 +6,16 @@
 #include <QDebug>
 #include <QStyle>
 #include <QDesktopWidget>
-#include <thread>
+#include <QtMultimedia/QAudioDeviceInfo>
+#include <QtMultimedia/QAudioInput>
+//#include <thread>
 #include <mutex>
 #include <map>
 #include "Socket.hpp" // OS specific before other !
 #include "../tools/serverApi.hpp"
 #include "connection.h"
 #include "live/modelive.h"
+#include "live/modeaudiolive.h"
 
 namespace Ui {
 class MainWindow;
@@ -36,6 +39,7 @@ public:
 
 signals:
     void new_serv_msg(QString msg);
+    void enter_audio_tab();
 
 private slots:
     void onConnected();
@@ -47,12 +51,19 @@ private slots:
 
     void on_settingStayActive_toggled(bool checked);
 
+    void on_tabWidget_currentChanged(int index);
+
+    void on_live_audio_controller_startButton_clicked();
+
+    void on_live_audio_controller_stopButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     ISocket *main_sock;
     serverApi *server_api;
 
     modeLive *mode_live;
+    modeAudioLive *mode_audio_live;
 
     /* setting */
     bool server_stay_alive;

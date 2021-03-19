@@ -4,7 +4,8 @@
 serverApi::serverApi(ISocket *server_socket)
     : server_socket(server_socket)
 {
-
+    QObject::connect(this, &serverApi::sig_sendAndCheckBasicResp,
+                     this, &serverApi::slot_sendAndCheckBasicResp);
 }
 
 serverApi::~serverApi()
@@ -76,6 +77,7 @@ bool serverApi::checkBasicRespArray(std::vector<std::string> resp_array, std::st
 
 std::string serverApi::sendToServer(std::string cmd)
 {
+    this->socket_lock.lock();
     std::string serv_msg;
 
     emit send_recv_server_msg(cmd, "send");
@@ -98,7 +100,24 @@ std::string serverApi::sendToServer(std::string cmd)
 
     emit send_recv_server_msg(serv_msg, "recv");
 
+    this->socket_lock.unlock();
     return serv_msg;
+}
+
+void serverApi::slot_sendAndCheckBasicResp(std::string cmd, std::string fct_name)
+{
+    std::thread *th = new std::thread(&serverApi::sendAndCheckBasicResp, this, cmd, fct_name);
+    th->detach();
+}
+
+void serverApi::sendAndCheckBasicResp(std::string cmd, std::string fct_name)
+{
+    //qInfo() << "STARTING sendAndCheckBasicResp\n";
+    std::string resp = this->sendToServer(cmd);
+
+    std::vector<std::string> resp_array = this->splitStrToArray(resp);
+    this->checkBasicRespArray(resp_array, fct_name);
+    //qInfo() << "FINISHED sendAndCheckBasicResp\n";
 }
 
 void serverApi::parseLiveStatus(std::vector<std::string> resp_array, size_t start_idx)
@@ -195,7 +214,7 @@ bool serverApi::getServerSetting()
     return true;
 }
 
-bool serverApi::setServerSetting(std::string setting, std::string value)
+void serverApi::setServerSetting(std::string setting, std::string value)
 {
     std::string cmd = "SETTING";
     if (setting == "stay_active")
@@ -204,49 +223,63 @@ bool serverApi::setServerSetting(std::string setting, std::string value)
         if (value == "true" || value == "false")
             cmd += " " + value;
         else
-            return false;
+            return;
     }
     else
-        return false;
+        return;
 
+    emit sig_sendAndCheckBasicResp(cmd, "setServerSetting");
+    /*
     std::string resp = this->sendToServer(cmd);
 
     std::vector<std::string> resp_array = this->splitStrToArray(resp);
-    return this->checkBasicRespArray(resp_array, "setServerSetting");
+    this->checkBasicRespArray(resp_array, "setServerSetting");
+    */
 }
 
-bool serverApi::liveSetInputServer(int pin, std::string name)
+void serverApi::liveSetInputServer(int pin, std::string name)
 {
     std::string cmd = "LIVE set input ";
     cmd += std::to_string(pin);
     cmd += " \"" + name + "\"";
 
+    emit sig_sendAndCheckBasicResp(cmd, "liveSetInputServer");
+    /*
     std::string resp = this->sendToServer(cmd);
 
     std::vector<std::string> resp_array = this->splitStrToArray(resp);
-    return this->checkBasicRespArray(resp_array, "liveSetInputServer");
+    this->checkBasicRespArray(resp_array, "liveSetInputServer");
+    */
 }
 
-bool serverApi::liveSetOutputServer(int pin, int value, std::string name)
+void serverApi::liveSetOutputServer(int pin, int value, std::string name)
 {
     std::string cmd = "LIVE set output ";
     cmd += std::to_string(pin);
     cmd += " " + std::to_string(value);
     cmd += " \"" + name + "\"";
 
+    emit sig_sendAndCheckBasicResp(cmd, "liveSetOutputServer");
+    //qInfo() << "AFTER sig_sendAndCheckBasicResp\n";
+    //th->detach();
+    /*
     std::string resp = this->sendToServer(cmd);
 
     std::vector<std::string> resp_array = this->splitStrToArray(resp);
-    return this->checkBasicRespArray(resp_array, "liveSetOutputServer");
+    this->checkBasicRespArray(resp_array, "liveSetOutputServer");
+    */
 }
 
-bool serverApi::liveDelPinServer(int pin)
+void serverApi::liveDelPinServer(int pin)
 {
     std::string cmd = "LIVE del ";
     cmd += std::to_string(pin);
 
+    emit sig_sendAndCheckBasicResp(cmd, "liveDelPinServer");
+    /*
     std::string resp = this->sendToServer(cmd);
 
     std::vector<std::string> resp_array = this->splitStrToArray(resp);
-    return this->checkBasicRespArray(resp_array, "liveDelPinServer");
+    this->checkBasicRespArray(resp_array, "liveDelPinServer");
+    */
 }

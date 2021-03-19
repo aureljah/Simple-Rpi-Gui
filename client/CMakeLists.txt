@@ -43,6 +43,8 @@ add_executable(${EXEC_NAME} src/main.cpp
                         src/gui/connection.ui
                         src/gui/live/modelive.cpp
                         src/gui/live/modelive.h
+                        src/gui/live/modeaudiolive.cpp
+                        src/gui/live/modeaudiolive.h
                         src/gui/live/dynamicoutput.cpp
                         src/gui/live/dynamicoutput.h
                         src/gui/live/dynamicoutput.ui
@@ -66,6 +68,8 @@ target_link_libraries(${EXEC_NAME} ${CMAKE_THREAD_LIBS_INIT})
 
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 target_link_libraries(${EXEC_NAME} Qt5::Widgets)
+find_package(Qt5 COMPONENTS Multimedia REQUIRED)
+target_link_libraries(${EXEC_NAME} Qt5::Multimedia)
 
 IF( WIN32 )
 	target_link_libraries(${EXEC_NAME} ws2_32)

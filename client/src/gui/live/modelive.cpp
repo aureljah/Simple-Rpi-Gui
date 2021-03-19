@@ -298,6 +298,19 @@ std::list<int> modeLive::getUsedPins(int pin_ignored)
     return used_pins;
 }
 
+std::map<QString, int> modeLive::getOutputNamePinList()
+{
+    std::map<QString, int> output_list;
+
+    for(std::map<QString, dynamicOutput*>::iterator it = this->dyn_o_widgets.begin(); it != this->dyn_o_widgets.end(); it++)
+    {
+        dynamicOutput *output = it->second;
+        output_list[output->getName()] = output->getPin();
+    }
+
+    return output_list;
+}
+
 void modeLive::live_output_upButton_clicked(QString name)
 {
     dynamicOutput *item = this->dyn_o_widgets[name];
@@ -417,6 +430,17 @@ void modeLive::update_input_value(int pin, int value)
         if((it->second->getPin()) == pin)
         {
             it->second->updateValue(value);
+            break;
+        }
+    }
+}
+void modeLive::update_output_value(int pin, int value)
+{
+    for(std::map<QString, dynamicOutput*>::iterator it = this->dyn_o_widgets.begin(); it != this->dyn_o_widgets.end(); it++)
+    {
+        if((it->second->getPin()) == pin)
+        {
+            it->second->updatePinValue(value);
             break;
         }
     }

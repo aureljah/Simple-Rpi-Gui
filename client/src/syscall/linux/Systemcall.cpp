@@ -3,6 +3,7 @@
 
 namespace systemcall
 {
+    /* Sleep/wait for (int) millisecond */
 	void sys_usleep(int millisec)
 	{
 		if (millisec >= 1000)

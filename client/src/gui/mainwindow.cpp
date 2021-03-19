@@ -3,7 +3,7 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow), server_stay_alive(false)
+    ui(new Ui::MainWindow), server_stay_alive(false), mode_audio_live(nullptr)
 {
     this->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, this->size(), qApp->desktop()->screenGeometry(this)));
     ui->setupUi(this);
@@ -25,6 +25,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     this->startConnectWin();
+
+    this->mode_audio_live = new modeAudioLive(ui->audio_tab, this->mode_live);
+    QObject::connect(this, &MainWindow::enter_audio_tab,
+                     this->mode_audio_live, &modeAudioLive::updateOutputSelect);
+
+    auto info = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
+    ui->live_audio_controller_comboBox->clear();
+    foreach (auto i, info) ui->live_audio_controller_comboBox->addItem(i.deviceName());
+    ui->live_audio_controller_comboBox->setCurrentText(QAudioDeviceInfo::defaultInputDevice().deviceName());
 }
 
 MainWindow::~MainWindow()
@@ -157,4 +166,42 @@ void MainWindow::on_settingStayActive_toggled(bool checked)
         this->server_api->setServerSetting("stay_active", "true");
     else
         this->server_api->setServerSetting("stay_active", "false");
+}
+
+void MainWindow::on_tabWidget_currentChanged(int index)
+{
+    if (ui->tabWidget->currentWidget() == ui->audio_tab)
+    {
+        emit enter_audio_tab();
+
+        /*auto audioRecorder = new QAudioRecorder();
+        const QStringList inputs = audioRecorder->audioInputs();
+        QString selectedInput = audioRecorder->defaultAudioInput();
+
+        for (const QString &input : inputs) {
+            QString description = audioRecorder->audioInputDescription(input);
+            qInfo() << input << ": " << description << "\n";
+            selectedInput = input;
+        }*/
+    }
+}
+
+void MainWindow::on_live_audio_controller_startButton_clicked()
+{
+    auto info = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
+    QAudioDeviceInfo selected_device = QAudioDeviceInfo::defaultInputDevice();
+    foreach (auto i, info)
+    {
+        if (i.deviceName() == ui->live_audio_controller_comboBox->currentText())
+        {
+            selected_device = i;
+            break;
+        }
+    }
+    this->mode_audio_live->startAudio(selected_device);
+}
+
+void MainWindow::on_live_audio_controller_stopButton_clicked()
+{
+    this->mode_audio_live->stopAudio();
 }

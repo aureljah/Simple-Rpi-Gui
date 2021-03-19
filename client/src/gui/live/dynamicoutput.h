@@ -26,10 +26,10 @@ public:
     void setPin(int pin);
     QString getName();
     void setName(QString name);
+    void updatePinValue(int new_value);
 
 private:
     void updateTitle();
-    void updatePinValue(int new_value);
     void updateLcdNumber();
 
 signals:

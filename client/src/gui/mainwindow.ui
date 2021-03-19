@@ -33,10 +33,10 @@
     </sizepolicy>
    </property>
    <layout class="QGridLayout" name="gridLayout_3">
-    <item row="0" column="0">
+    <item row="1" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="live_tab">
        <property name="sizePolicy">
@@ -46,7 +46,7 @@
         </sizepolicy>
        </property>
        <attribute name="title">
-        <string>Main tab</string>
+        <string>Live GPIO</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_4">
         <item row="4" column="1">
@@ -120,14 +120,235 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="QCheckBox" name="settingStayActive">
-          <property name="text">
-           <string>Server stay active after deconnection</string>
-          </property>
-         </widget>
-        </item>
        </layout>
+      </widget>
+      <widget class="QWidget" name="audio_tab">
+       <property name="minimumSize">
+        <size>
+         <width>1077</width>
+         <height>524</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>1077</width>
+         <height>524</height>
+        </size>
+       </property>
+       <attribute name="title">
+        <string>Live Audio</string>
+       </attribute>
+       <widget class="QGroupBox" name="live_audio_controller">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>365</width>
+          <height>150</height>
+         </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>365</width>
+          <height>150</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>581</width>
+          <height>150</height>
+         </size>
+        </property>
+        <property name="title">
+         <string>Live Audio controller</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QLabel" name="live_audio_status_label">
+           <property name="font">
+            <font>
+             <pointsize>14</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Status: NONE</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="live_audio_controller_comboBox">
+           <property name="minimumSize">
+            <size>
+             <width>331</width>
+             <height>26</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+             <stylestrategy>PreferDefault</stylestrategy>
+             <kerning>true</kerning>
+            </font>
+           </property>
+           <property name="currentText">
+            <string/>
+           </property>
+           <property name="placeholderText">
+            <string>Select recording device</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>Default recording device</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <layout class="QGridLayout" name="live_audio_controller_gridLayout">
+           <item row="0" column="0">
+            <widget class="QPushButton" name="live_audio_controller_startButton">
+             <property name="text">
+              <string>Start</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QPushButton" name="live_audio_controller_stopButton">
+             <property name="text">
+              <string>Stop</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QGroupBox" name="live_audio_graph">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>180</y>
+          <width>501</width>
+          <height>141</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>Audio data</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="3" column="0" colspan="3">
+          <widget class="QProgressBar" name="audio_current_value_progress">
+           <property name="value">
+            <number>24</number>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="audio_max_label">
+           <property name="font">
+            <font>
+             <pointsize>13</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Max value: </string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="audio_min_label">
+           <property name="font">
+            <font>
+             <pointsize>13</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Min value: </string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLabel" name="label_4">
+           <property name="font">
+            <font>
+             <pointsize>13</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>TextLabel</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLabel" name="label_2">
+           <property name="font">
+            <font>
+             <pointsize>13</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>TextLabel</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2" rowspan="2">
+          <widget class="QLCDNumber" name="audio_current_value_lcd"/>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QScrollArea" name="live_audio_select_scrollArea">
+        <property name="geometry">
+         <rect>
+          <x>720</x>
+          <y>90</y>
+          <width>331</width>
+          <height>231</height>
+         </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>331</width>
+          <height>231</height>
+         </size>
+        </property>
+        <property name="widgetResizable">
+         <bool>true</bool>
+        </property>
+        <widget class="QWidget" name="scrollAreaWidgetContents">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>329</width>
+           <height>229</height>
+          </rect>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QLabel" name="label">
+        <property name="geometry">
+         <rect>
+          <x>720</x>
+          <y>60</y>
+          <width>331</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Select Live Gpio output used</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="socket_tab">
        <property name="sizePolicy">
@@ -203,6 +424,13 @@
         </item>
        </layout>
       </widget>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QCheckBox" name="settingStayActive">
+      <property name="text">
+       <string>Server stay active after deconnection</string>
+      </property>
      </widget>
     </item>
    </layout>

@@ -8,8 +8,8 @@
 //#include <QString>
 //#include <QStyle>
 //#include <QDesktopWidget>
-//#include <thread>
-//#include <mutex>
+#include <thread>
+#include <mutex>
 #include <string>
 #include <map>
 #include <vector>
@@ -30,14 +30,15 @@ public:
     /* API */
     bool getServerStatus();
     bool getServerSetting();
-    bool setServerSetting(std::string setting, std::string value);
+    void setServerSetting(std::string setting, std::string value);
 
-    bool liveSetInputServer(int pin, std::string name);
-    bool liveSetOutputServer(int pin, int value, std::string name);
-    bool liveDelPinServer(int pin);
+    void liveSetInputServer(int pin, std::string name);
+    void liveSetOutputServer(int pin, int value, std::string name);
+    void liveDelPinServer(int pin);
     void liveParseInputReceiver(std::string data);
 
 signals:
+    void sig_sendAndCheckBasicResp(std::string cmd, std::string fct_name);
     void new_live_input(int, std::string);
     void new_live_output(int, int, std::string);
     void input_value_changed(int, int);
@@ -45,6 +46,10 @@ signals:
     void stay_alive_setting(bool);
 
     void send_recv_server_msg(std::string, std::string);
+
+private slots:
+    void slot_sendAndCheckBasicResp(std::string cmd, std::string fct_name);
+    void sendAndCheckBasicResp(std::string cmd, std::string fct_name);
 
 private:
     std::string sendToServer(std::string cmd);
@@ -55,6 +60,7 @@ private:
 
 private:
     ISocket *server_socket;
+    std::mutex socket_lock;
 
     //void (*interceptor)(std::string, std::string);
 };

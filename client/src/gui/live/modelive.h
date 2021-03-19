@@ -35,6 +35,7 @@ public:
 
     std::list<QString> getUsedName(QString name_ignored = nullptr);
     std::list<int> getUsedPins(int pin_ignored = -1);
+    std::map<QString, int> getOutputNamePinList();
 
 private:
     void server_input_receiver();
@@ -56,6 +57,7 @@ public slots:
     void add_input(int pin, std::string name);
     void add_output(int pin, int value, std::string name);
     void update_input_value(int pin, int value);
+    void update_output_value(int pin, int value);
 
 private:
     QWidget *live_tab;
