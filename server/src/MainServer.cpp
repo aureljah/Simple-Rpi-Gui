@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <exception>
 #include <string>
+#include <unistd.h>
 
 MainServer::MainServer()
     : live_mode(nullptr), setting_stay_active(true)
@@ -42,7 +43,13 @@ std::vector<std::string> MainServer::splitStrToArray(std::string cmd)
 
     if (idx_start < cmd.size())
     {
-        std::string tmp = cmd.substr(idx_start);
+        if (cmd[idx_start] == '"' && cmd.find("\"", idx_start + 1) != std::string::npos)
+        {
+            idx_start += 1;
+            idx_end = cmd.find("\"", idx_start);
+        }
+
+        std::string tmp = cmd.substr(idx_start, (idx_end - idx_start));
         array.push_back(tmp);
         //std::cout << "[DEBUG]: splitStrToArray: idx_start: " << idx_start << " - idx_end: (till the end) - tmp: " << tmp << "\n";
     }

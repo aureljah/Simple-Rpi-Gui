@@ -5,9 +5,15 @@ it'll be cross-platform (linux and windows) and will have a server side which mu
 <br/>
 
 ## Requirement
+  ### Client
 	-> CMake 3.10
 	-> OpenSSL 1.1.0+ - You can also find windows binaries on openssl wiki
 	-> Qt 5.13 (Open source)
+
+  ### Server
+  -> OpenSSL 1.1.0+
+  -> pigpio
+    Follow instruction on http://abyz.me.uk/rpi/pigpio/download.html
 <br/>
 
 # Usage

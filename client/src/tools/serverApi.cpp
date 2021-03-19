@@ -2,7 +2,7 @@
 #include <string>
 
 serverApi::serverApi(ISocket *server_socket)
-    : server_socket(server_socket)
+    : server_socket(server_socket), thread_count(0)
 {
     QObject::connect(this, &serverApi::sig_sendAndCheckBasicResp,
                      this, &serverApi::slot_sendAndCheckBasicResp);
@@ -40,7 +40,12 @@ std::vector<std::string> serverApi::splitStrToArray(std::string cmd)
 
     if (idx_start < cmd.size())
     {
-        std::string tmp = cmd.substr(idx_start);
+        if (cmd[idx_start] == '"' && cmd.find("\"", idx_start + 1) != std::string::npos)
+        {
+            idx_start += 1;
+            idx_end = cmd.find("\"", idx_start);
+        }
+        std::string tmp = cmd.substr(idx_start, (idx_end - idx_start));
         array.push_back(tmp);
         //std::cout << "[DEBUG]: splitStrToArray: idx_start: " << idx_start << " - idx_end: (till the end) - tmp: " << tmp << "\n";
     }
@@ -104,12 +109,25 @@ std::string serverApi::sendToServer(std::string cmd)
     return serv_msg;
 }
 
-void serverApi::slot_sendAndCheckBasicResp(std::string cmd, std::string fct_name)
+void serverApi::slot_sendAndCheckBasicResp(std::string cmd, std::string fct_name, bool can_skip)
 {
+    this->thread_count_lock.lock();
+    if (can_skip == true && this->thread_count >= THREAD_LIMIT)
+    {
+        qWarning() << "Warning: slot_sendAndCheckBasicResp: Thread limit exceeded, will skip\n";
+        this->thread_count_lock.unlock();
+        return;
+    }
+    this->thread_count += 1;
+    this->thread_count_lock.unlock();
+
     std::thread *th = new std::thread(&serverApi::sendAndCheckBasicResp, this, cmd, fct_name);
     th->detach();
 }
 
+/*
+ * ONLY FOR THREAD
+*/
 void serverApi::sendAndCheckBasicResp(std::string cmd, std::string fct_name)
 {
     //qInfo() << "STARTING sendAndCheckBasicResp\n";
@@ -118,6 +136,9 @@ void serverApi::sendAndCheckBasicResp(std::string cmd, std::string fct_name)
     std::vector<std::string> resp_array = this->splitStrToArray(resp);
     this->checkBasicRespArray(resp_array, fct_name);
     //qInfo() << "FINISHED sendAndCheckBasicResp\n";
+    this->thread_count_lock.lock();
+    this->thread_count -= 1;
+    this->thread_count_lock.unlock();
 }
 
 void serverApi::parseLiveStatus(std::vector<std::string> resp_array, size_t start_idx)
@@ -228,7 +249,7 @@ void serverApi::setServerSetting(std::string setting, std::string value)
     else
         return;
 
-    emit sig_sendAndCheckBasicResp(cmd, "setServerSetting");
+    emit sig_sendAndCheckBasicResp(cmd, "setServerSetting", false);
     /*
     std::string resp = this->sendToServer(cmd);
 
@@ -243,7 +264,7 @@ void serverApi::liveSetInputServer(int pin, std::string name)
     cmd += std::to_string(pin);
     cmd += " \"" + name + "\"";
 
-    emit sig_sendAndCheckBasicResp(cmd, "liveSetInputServer");
+    emit sig_sendAndCheckBasicResp(cmd, "liveSetInputServer", false);
     /*
     std::string resp = this->sendToServer(cmd);
 
@@ -259,7 +280,7 @@ void serverApi::liveSetOutputServer(int pin, int value, std::string name)
     cmd += " " + std::to_string(value);
     cmd += " \"" + name + "\"";
 
-    emit sig_sendAndCheckBasicResp(cmd, "liveSetOutputServer");
+    emit sig_sendAndCheckBasicResp(cmd, "liveSetOutputServer", true);
     //qInfo() << "AFTER sig_sendAndCheckBasicResp\n";
     //th->detach();
     /*
@@ -275,7 +296,7 @@ void serverApi::liveDelPinServer(int pin)
     std::string cmd = "LIVE del ";
     cmd += std::to_string(pin);
 
-    emit sig_sendAndCheckBasicResp(cmd, "liveDelPinServer");
+    emit sig_sendAndCheckBasicResp(cmd, "liveDelPinServer", false);
     /*
     std::string resp = this->sendToServer(cmd);
 

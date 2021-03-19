@@ -32,7 +32,7 @@
 //#define PCM_CHANNEL_COUNT 1
 #define PCM_SAMPLE_SIZE 16
 #define BUFFER_SIZE 1024
-#define UPDATE_INTERVAL_MS 20 // 20 => 0,02sec => 50 time per seconde
+#define UPDATE_INTERVAL_MS 50 // 20 => 0,02sec => 50 time per seconde
 
 class modeAudioLive : public QObject
 {

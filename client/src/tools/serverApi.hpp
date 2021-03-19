@@ -14,6 +14,8 @@
 #include <map>
 #include <vector>
 
+#define THREAD_LIMIT 10
+
 class serverApi : public QObject
 {
     Q_OBJECT
@@ -38,7 +40,7 @@ public:
     void liveParseInputReceiver(std::string data);
 
 signals:
-    void sig_sendAndCheckBasicResp(std::string cmd, std::string fct_name);
+    void sig_sendAndCheckBasicResp(std::string cmd, std::string fct_name, bool can_skip);
     void new_live_input(int, std::string);
     void new_live_output(int, int, std::string);
     void input_value_changed(int, int);
@@ -48,8 +50,8 @@ signals:
     void send_recv_server_msg(std::string, std::string);
 
 private slots:
-    void slot_sendAndCheckBasicResp(std::string cmd, std::string fct_name);
-    void sendAndCheckBasicResp(std::string cmd, std::string fct_name);
+    void slot_sendAndCheckBasicResp(std::string cmd, std::string fct_name, bool can_skip);
+    void sendAndCheckBasicResp(std::string cmd, std::string fct_name); //* ONLY FOR THREAD
 
 private:
     std::string sendToServer(std::string cmd);
@@ -61,6 +63,8 @@ private:
 private:
     ISocket *server_socket;
     std::mutex socket_lock;
+    int thread_count;
+    std::mutex thread_count_lock;
 
     //void (*interceptor)(std::string, std::string);
 };

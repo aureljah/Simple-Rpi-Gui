@@ -150,7 +150,7 @@ void modeAudioLive::buffer_processing()
     //const int channelBytes = floor(PCM_SAMPLE_SIZE / 8);
     //const int sampleBytes = PCM_CHANNEL_COUNT * channelBytes;
 
-    qint64 last_time;
+    qint64 last_time = 0;
     char *buffer = new char[BUFFER_SIZE + 2];
     while (this->buffer_thread_running)
     {
