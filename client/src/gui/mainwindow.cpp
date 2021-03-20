@@ -3,7 +3,7 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow), server_stay_alive(false), mode_audio_live(nullptr)
+    ui(new Ui::MainWindow), mode_audio_live(nullptr), server_stay_alive(false)
 {
     this->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, this->size(), qApp->desktop()->screenGeometry(this)));
     ui->setupUi(this);
@@ -14,6 +14,8 @@ MainWindow::MainWindow(QWidget *parent) :
                      this, &MainWindow::writeToDebugScreen);
     QObject::connect(this->server_api, &serverApi::stay_alive_setting,
                      this, &MainWindow::setServerStayAlive);
+    QObject::connect(this->server_api, &serverApi::error_500,
+                     this, &MainWindow::error_500_handler);
 
     this->mode_live = new modeLive(ui->live_tab, this->server_api);
     QObject::connect(this->server_api, &serverApi::new_live_input,
@@ -26,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->startConnectWin();
 
-    this->mode_audio_live = new modeAudioLive(ui->audio_tab, this->mode_live);
+    this->mode_audio_live = new modeAudioLive(ui->audio_tab, this->mode_live, this->server_api);
     QObject::connect(this, &MainWindow::enter_audio_tab,
                      this->mode_audio_live, &modeAudioLive::updateOutputSelect);
 
@@ -131,6 +133,18 @@ void MainWindow::onConnected()
 
     this->server_api->getServerStatus();
     this->server_api->getServerSetting();
+}
+
+void MainWindow::error_500_handler(std::string fct_name, std::string msg)
+{
+    qInfo() << "error_500_handler: received error 500 from serverApi\n";
+
+    // do things due to error
+    this->mode_audio_live->stopAudio();
+
+    QMessageBox msgBox;
+    msgBox.setText(QString::fromStdString(fct_name) + " Error 500: " + QString::fromStdString(msg));
+    msgBox.exec();
 }
 
 /* send ping/msg to server boutton */

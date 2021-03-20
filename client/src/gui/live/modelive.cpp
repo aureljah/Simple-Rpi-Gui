@@ -311,6 +311,16 @@ std::map<QString, int> modeLive::getOutputNamePinList()
     return output_list;
 }
 
+QString modeLive::getOutputNameFromPin(int pin)
+{
+    for(std::map<QString, dynamicOutput*>::iterator it = this->dyn_o_widgets.begin(); it != this->dyn_o_widgets.end(); it++)
+    {
+        if (it->second->getPin() == pin)
+            return it->second->getName();
+    }
+    return "";
+}
+
 void modeLive::live_output_upButton_clicked(QString name)
 {
     dynamicOutput *item = this->dyn_o_widgets[name];
@@ -434,13 +444,13 @@ void modeLive::update_input_value(int pin, int value)
         }
     }
 }
-void modeLive::update_output_value(int pin, int value)
+void modeLive::update_output_value(int pin, int value, bool dont_send_to_server)
 {
     for(std::map<QString, dynamicOutput*>::iterator it = this->dyn_o_widgets.begin(); it != this->dyn_o_widgets.end(); it++)
     {
         if((it->second->getPin()) == pin)
         {
-            it->second->updatePinValue(value);
+            it->second->updatePinValue(value, dont_send_to_server);
             break;
         }
     }

@@ -37,6 +37,9 @@ public:
     std::list<int> getUsedPins(int pin_ignored = -1);
     std::map<QString, int> getOutputNamePinList();
 
+    QString getOutputNameFromPin(int pin);
+    //int getOutputValueFromPin(int pin);
+
 private:
     void server_input_receiver();
     dynamicOutput *find_dyn_out(QString name);
@@ -57,7 +60,7 @@ public slots:
     void add_input(int pin, std::string name);
     void add_output(int pin, int value, std::string name);
     void update_input_value(int pin, int value);
-    void update_output_value(int pin, int value);
+    void update_output_value(int pin, int value, bool dont_send_to_server = false);
 
 private:
     QWidget *live_tab;

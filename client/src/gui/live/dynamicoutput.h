@@ -26,7 +26,7 @@ public:
     void setPin(int pin);
     QString getName();
     void setName(QString name);
-    void updatePinValue(int new_value);
+    void updatePinValue(int new_value, bool dont_send_to_server = false);
 
 private:
     void updateTitle();

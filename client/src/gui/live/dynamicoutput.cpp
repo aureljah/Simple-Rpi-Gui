@@ -89,7 +89,7 @@ void dynamicOutput::updateLcdNumber()
     ui->lcdNumber->setStyleSheet("background-color: rgb("+QString::number(red)+", "+ QString::number(green) +", 0);");
 }
 
-void dynamicOutput::updatePinValue(int new_value)
+void dynamicOutput::updatePinValue(int new_value, bool dont_send_to_server)
 {
     //qInfo() << "updatePinValue value: " << value << "\n";
     if (new_value < 0)
@@ -127,7 +127,8 @@ void dynamicOutput::updatePinValue(int new_value)
         ui->onButton->setAutoExclusive(true);
     }
 
-    this->server_api->liveSetOutputServer(this->pin, this->value, this->name.toStdString());
+    if (dont_send_to_server == false)
+        this->server_api->liveSetOutputServer(this->pin, this->value, this->name.toStdString());
 }
 
 void dynamicOutput::on_onButton_clicked(bool checked)

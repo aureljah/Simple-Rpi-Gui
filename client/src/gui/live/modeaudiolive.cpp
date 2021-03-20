@@ -1,7 +1,7 @@
 #include "modeaudiolive.h"
 
-modeAudioLive::modeAudioLive(QWidget *live_audio_tab, modeLive *mode_live)
-    : live_audio_tab(live_audio_tab), mode_live(mode_live), audioInput(nullptr), buffer_process_thread(nullptr),
+modeAudioLive::modeAudioLive(QWidget *live_audio_tab, modeLive *mode_live, serverApi *server_api)
+    : live_audio_tab(live_audio_tab), mode_live(mode_live), server_api(server_api), audioInput(nullptr), buffer_process_thread(nullptr),
     current_value(0), max_value(0), min_value(-1)
 {
     this->changeStatus(AudioStatus::STOPPED);
@@ -54,9 +54,10 @@ void modeAudioLive::stopAudio()
         this->buffer_process_thread = nullptr;
     }
     if (this->audioInput) {
-        this->audioInput->stop();
-        delete this->audioInput;
+        QAudioInput *audio_input = this->audioInput;
         this->audioInput = nullptr;
+        audio_input->stop();
+        delete audio_input;
     }
     this->changeStatus(AudioStatus::STOPPED);
 }
@@ -154,7 +155,7 @@ void modeAudioLive::buffer_processing()
     char *buffer = new char[BUFFER_SIZE + 2];
     while (this->buffer_thread_running)
     {
-        qint64 bytesReady = this->audioInput->bytesReady();
+        //qint64 bytesReady = this->audioInput->bytesReady();
 
         for (int i = 0 ; i < BUFFER_SIZE + 2; i++)
         {   buffer[i] = 0;  }
@@ -162,7 +163,7 @@ void modeAudioLive::buffer_processing()
         qint64 readed = this->audioDevice->read(buffer, BUFFER_SIZE);
         if (readed > 0)
         {
-            qInfo() << "buffer_processing: readed: " << readed << " - bytesReady: " << bytesReady << "\n";
+            //qInfo() << "buffer_processing: readed: " << readed << " - bytesReady: " << bytesReady << "\n";
 
             //emit current_value_update(buffer, readed);
             qint64 cur_time = QDateTime::currentMSecsSinceEpoch();
@@ -257,18 +258,30 @@ void modeAudioLive::updateAudioValue(int value)
 
 void modeAudioLive::useCheckedOutput()
 {
-    std::list<int> output_pin_list;
+    std::vector<int> checked_pin_list;
+    std::vector<int> output_pin_list;
+    std::vector<int> output_value_list;
+    std::vector<std::string> output_name_list;
     std::map<int, QCheckBox*>::iterator it = this->live_output_list.begin();
-    while (it != this->live_output_list.end()) {
-        if (it->second->isChecked() == true) {
-            output_pin_list.push_back(it->first);
-        }
+    while (it != this->live_output_list.end())
+    {
+        if (it->second->isChecked() == true)
+            checked_pin_list.push_back(it->first);
         it++;
     }
 
-    for(std::list<int>::iterator it = output_pin_list.begin(); it != output_pin_list.end(); it++) {
-        this->mode_live->update_output_value(*it, this->current_value);
+    for(std::vector<int>::iterator it = checked_pin_list.begin(); it != checked_pin_list.end(); it++)
+    {
+        QString name = this->mode_live->getOutputNameFromPin(*it);
+        if (name != "")
+        {
+            output_pin_list.push_back(*it);
+            output_value_list.push_back(this->current_value);
+            output_name_list.push_back(name.toStdString());
+            this->mode_live->update_output_value(*it, this->current_value, true);
+        }
     }
+    this->server_api->liveSetSeveralOutputServer(output_pin_list, output_value_list, output_name_list);
 }
 
 void modeAudioLive::updateAudioGui() {

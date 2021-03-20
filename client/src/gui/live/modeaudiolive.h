@@ -24,6 +24,7 @@
 #include <string>
 #include <cmath>
 #include <map>
+#include <vector>
 #include <list>
 #include <qendian.h>
 #include "Systemcall.hpp"
@@ -46,12 +47,12 @@ enum AudioStatus {
 };
 
 public:
-    modeAudioLive(QWidget *live_audio_tab, modeLive *mode_live);
+    modeAudioLive(QWidget *live_audio_tab, modeLive *mode_live, serverApi *server_api);
     ~modeAudioLive();
 
     void startAudio(QAudioDeviceInfo inputDevice);
     void stopAudio();
-    //AudioStatus getStatus() {return this->status;};
+    AudioStatus getStatus() {return this->status;};
 
 public slots:
     void updateOutputSelect();
@@ -76,6 +77,8 @@ signals:
 private:
     QWidget *live_audio_tab;
     modeLive *mode_live;
+    serverApi *server_api;
+
     QAudioInput *audioInput;
     QIODevice *audioDevice;
     QAudioFormat formatAudio;

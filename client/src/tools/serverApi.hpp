@@ -8,6 +8,7 @@
 //#include <QString>
 //#include <QStyle>
 //#include <QDesktopWidget>
+#include <QDateTime>
 #include <thread>
 #include <mutex>
 #include <string>
@@ -15,6 +16,8 @@
 #include <vector>
 
 #define THREAD_LIMIT 10
+
+#define ERROR_MSGBOX_TIMEOUT 5000 // 5 sec
 
 class serverApi : public QObject
 {
@@ -36,6 +39,7 @@ public:
 
     void liveSetInputServer(int pin, std::string name);
     void liveSetOutputServer(int pin, int value, std::string name);
+    void liveSetSeveralOutputServer(std::vector<int> pins, std::vector<int> values, std::vector<std::string> names);
     void liveDelPinServer(int pin);
     void liveParseInputReceiver(std::string data);
 
@@ -47,6 +51,7 @@ signals:
 
     void stay_alive_setting(bool);
 
+    void error_500(std::string, std::string);
     void send_recv_server_msg(std::string, std::string);
 
 private slots:
@@ -63,8 +68,11 @@ private:
 private:
     ISocket *server_socket;
     std::mutex socket_lock;
+    std::mutex error_handler_lock;
     int thread_count;
     std::mutex thread_count_lock;
+
+    qint64 last_err_time;
 
     //void (*interceptor)(std::string, std::string);
 };

@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <exception>
 #include <string>
+#include <thread>
 #include <unistd.h>
 
 MainServer::MainServer()
@@ -102,7 +103,8 @@ std::string MainServer::parseCommand(std::string cmd)
             else if (cmd_array[i] == "output")
             {
                 if (cmd_array.size() > i + 3)
-                    return this->liveSetOutputCommand(cmd_array[i + 1], cmd_array[i + 2], cmd_array[i + 3]);
+                    return this->parseLiveSetOutputCommand(cmd_array, (i + 1));
+                    //return this->liveSetOutputCommand(cmd_array[i + 1], cmd_array[i + 2], cmd_array[i + 3]);
                 else
                     throw std::runtime_error("LIVE set output: missing parameters");
             }
@@ -123,6 +125,38 @@ std::string MainServer::parseCommand(std::string cmd)
         throw std::runtime_error("Command <" + cmd_array[i] + "> not found");
 
     return "TODO";
+}
+
+std::string MainServer::parseLiveSetOutputCommand(std::vector<std::string> cmd_array, size_t idx_start)
+{
+    size_t i = idx_start;
+    std::string err = "";
+    std::vector<std::thread> thread_list;
+
+    while (cmd_array.size() > (i + 2))
+    {
+        try {
+            thread_list.push_back(std::thread(&MainServer::liveSetOutputCommand, this, cmd_array[i], cmd_array[i + 1], cmd_array[i + 2]));
+            //std::cout << "parseLiveSetOutputCommand: thread " << thread_list.size() << "started !\n";
+            //this->liveSetOutputCommand(cmd_array[i], cmd_array[i + 1], cmd_array[i + 2]);
+        }
+        catch(std::exception &ex) {
+            err = ex.what();
+            //std::cout << "parseLiveSetOutputCommand: error catched (from thread?), err: " << ex.what() << "\n";
+        }
+        i += 3;
+    }
+
+    for (size_t j = 0 ; j < thread_list.size() ; j++)
+    {
+        //std::cout << "parseLiveSetOutputCommand: thread " << j << "joined !\n";
+        thread_list[j].join();
+    }
+
+    if (err != "")
+        throw std::runtime_error(err);
+
+    return ""; // OK
 }
 
 std::string MainServer::getStatusCommand()

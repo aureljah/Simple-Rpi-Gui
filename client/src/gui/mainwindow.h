@@ -46,6 +46,8 @@ private slots:
     void on_pushButton_clicked();
     void onMsgFromServer(QString msg);
 
+    void error_500_handler(std::string fct_name, std::string msg);
+
     void on_live_add_output_pushButton_clicked();
     void on_live_add_input_pushButton_clicked();
 

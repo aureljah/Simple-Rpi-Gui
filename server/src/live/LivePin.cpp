@@ -38,7 +38,9 @@ int LivePin::getValue() {
 }
 
 bool LivePin::setName(std::string name) {
+    this->set_lock.lock();
     this->name = name;
+    this->set_lock.unlock();
     return true;
 }
 
@@ -47,8 +49,10 @@ bool LivePin::setValue(int value) {
         return false;
     }
 
+    this->set_lock.lock();
     this->rpi->writeGpioOutput(this->pin, value);
     this->value = value;
+    this->set_lock.unlock();
 
     return true;
 }

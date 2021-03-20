@@ -4,6 +4,7 @@
 #include <iostream>
 #include <exception>
 #include <string>
+#include <mutex>
 
 namespace GPIO_TYPE {
     enum gpio_type {
@@ -34,4 +35,6 @@ private:
     GPIO_TYPE::gpio_type type;
     std::string name;
     int value;
+
+    std::mutex set_lock;
 };

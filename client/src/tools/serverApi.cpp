@@ -2,7 +2,7 @@
 #include <string>
 
 serverApi::serverApi(ISocket *server_socket)
-    : server_socket(server_socket), thread_count(0)
+    : server_socket(server_socket), thread_count(0), last_err_time(0)
 {
     QObject::connect(this, &serverApi::sig_sendAndCheckBasicResp,
                      this, &serverApi::slot_sendAndCheckBasicResp);
@@ -65,10 +65,18 @@ bool serverApi::checkBasicRespArray(std::vector<std::string> resp_array, std::st
     {
         if (resp_array.size() > 1)
         {
+            qint64 err_time = QDateTime::currentMSecsSinceEpoch();
+            if ((err_time - this->last_err_time) < ERROR_MSGBOX_TIMEOUT)
+                return false;
+
+            this->error_handler_lock.lock();
+            this->last_err_time = err_time;
             qInfo() << QString::fromStdString(fct_name) << " Error 500: " << QString::fromStdString(resp_array[1]) << "\n";
-            QMessageBox msgBox;
-            msgBox.setText(QString::fromStdString(fct_name) + " Error 500: " + QString::fromStdString(resp_array[1]));
-            msgBox.exec();
+
+            emit error_500(fct_name, resp_array[1]);
+            qInfo() << "EMITED error_500\n";
+
+            this->error_handler_lock.unlock();
         }
         else
             qInfo() << QString::fromStdString(fct_name) << " Error 500: <no msg>\n";
@@ -271,6 +279,30 @@ void serverApi::liveSetInputServer(int pin, std::string name)
     std::vector<std::string> resp_array = this->splitStrToArray(resp);
     this->checkBasicRespArray(resp_array, "liveSetInputServer");
     */
+}
+
+void serverApi::liveSetSeveralOutputServer(std::vector<int> pins, std::vector<int> values, std::vector<std::string> names)
+{
+    std::string cmd = "LIVE set output";
+    if (pins.size() > 0 && pins.size() == values.size() && pins.size() == names.size())
+    {
+        for (size_t i = 0 ; i < pins.size() ; i++)
+        {
+            cmd += " ";
+            cmd += std::to_string(pins[i]);
+            cmd += " " + std::to_string(values[i]);
+            cmd += " \"" + names[i] + "\"";
+        }
+    }
+    else
+    {
+        qInfo() << "liveSetSeveralOutputServer: Error: size == 0 or size mismatch\n";
+        qInfo() << "liveSetSeveralOutputServer: pins.size: " << pins.size() << " - values.size: " << values.size() << " - names.size: " << names.size() << "\n";
+        return;
+    }
+
+    //qInfo() << "liveSetSeveralOutputServer: cmd: " << QString::fromStdString(cmd) << "\n";
+    emit sig_sendAndCheckBasicResp(cmd, "liveSetOutputServer", true);
 }
 
 void serverApi::liveSetOutputServer(int pin, int value, std::string name)

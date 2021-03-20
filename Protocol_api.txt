@@ -48,7 +48,7 @@ Example of SETTING
 
 LIVE (set | del)
     set (input | output)
-        output <pin> <value> "<name>"
+        output [<pin> <value> "<name>"]
         input <pin> "<name>"
 
             # possible responses #:
@@ -71,6 +71,8 @@ Example for LIVE:
         => will set (or create if needed) the output in pin 8 to value=100 and name="my output 1"
     LIVE set output 5 54 "my LED output 35"\r\n
         => will set (or create if needed) the output in pin 5 to value=54 (PWM is used here) and name="my LED output 35"
+    LIVE set output 5 54 "my LED output 35" 8 100 "my output 1"\r\n
+        => set/create several outputs
     
     LIVE set input 5 "my input"\r\n
         => will set (or create if needed) the input in pin 5 to name="my input"

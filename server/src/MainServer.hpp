@@ -32,6 +32,7 @@ private:
     std::string setSettingCommand(std::string setting, std::string value);
 
     std::string liveSetInputCommand(std::string cmd_pin, std::string cmd_name);
+    std::string parseLiveSetOutputCommand(std::vector<std::string> cmd_array, size_t idx_start);
     std::string liveSetOutputCommand(std::string cmd_pin, std::string cmd_value, std::string cmd_name);
     std::string liveDelPinCommand(std::string cmd_pin);
 
