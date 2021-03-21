@@ -8,7 +8,7 @@
 #include <mutex>
 #include <unistd.h>
 
-#define FADE_RATE_MS 10 // 10ms => 0 to 100 in 1sec
+#define FADE_RATE_MS 5 // 10ms => 0 to 100 in 1sec
 
 namespace GPIO_TYPE {
     enum gpio_type {
