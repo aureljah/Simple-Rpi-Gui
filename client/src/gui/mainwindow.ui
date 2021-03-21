@@ -197,10 +197,7 @@
             <string>Select where to get audio data from</string>
            </property>
            <property name="currentText">
-            <string/>
-           </property>
-           <property name="placeholderText">
-            <string>Select recording device</string>
+            <string>Default recording device</string>
            </property>
            <item>
             <property name="text">
