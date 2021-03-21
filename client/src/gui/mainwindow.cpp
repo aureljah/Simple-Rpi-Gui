@@ -284,3 +284,8 @@ void MainWindow::on_live_use_fade_out_checkBox_toggled(bool checked)
     else
         this->server_api->setServerSetting("use_fade_out", "false");
 }
+
+void MainWindow::on_audio_reset_telemetry_button_clicked()
+{
+    this->mode_audio_live->resetTelemetry();
+}

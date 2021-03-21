@@ -63,6 +63,7 @@ public:
     void setUseLinearChange(bool checked);
     void setUseMaxValueChange(bool checked);
     void setMaxValueChange(int value);
+    void resetTelemetry();
 
 public slots:
     void updateOutputSelect();
@@ -72,7 +73,6 @@ private:
     void useCheckedOutput();
     void updateAudioGui();
     void changeStatus(AudioStatus status, QString added_text = "");
-    void resetTelemetry();
     void setMaxAplitude();
     void audioBufferToLevel(char *data, int len);
 

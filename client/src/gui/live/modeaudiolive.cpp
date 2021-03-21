@@ -325,7 +325,6 @@ void modeAudioLive::useCheckedOutput()
 
     if (this->checkOutputCoef(output_pin_list) == true)
     {
-        qInfo() << "checkOutputCoef is TRUE \n";
         if (this->use_linear_change == true)
             this->updateLinearChangeCoef();
 
@@ -478,7 +477,7 @@ void modeAudioLive::updateAudioGui() {
 
     QLabel* raw_label = live_audio_tab->findChild<QLabel*>("audio_raw_value_label", Qt::FindChildrenRecursively);
     if (raw_label)
-        raw_label->setText("Min value: " + QString::fromStdString(std::to_string(this->raw_value)));
+        raw_label->setText("Raw value: " + QString::fromStdString(std::to_string(this->raw_value)));
 
     QProgressBar* progress = live_audio_tab->findChild<QProgressBar*>("audio_current_value_progress", Qt::FindChildrenRecursively);
     if (progress)
