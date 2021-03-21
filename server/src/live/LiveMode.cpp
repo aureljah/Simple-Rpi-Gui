@@ -93,8 +93,8 @@ std::string LiveMode::setInput(int pin, std::string name)
         if (this->outputs.find(pin) != this->outputs.end())
             throw std::runtime_error("Pin already exists as output");
 
-        LivePin *new_output = new LivePin(this->rpi, pin, GPIO_TYPE::INPUT, name);
-        this->inputs[pin] = new_output;
+        LivePin *new_input = new LivePin(this->rpi, pin, GPIO_TYPE::INPUT, name);
+        this->inputs[pin] = new_input;
     }
     return ""; // OK
 }

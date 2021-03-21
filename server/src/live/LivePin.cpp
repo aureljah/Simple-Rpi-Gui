@@ -53,18 +53,24 @@ bool LivePin::setValue(int value) {
     if (this->type != GPIO_TYPE::OUTPUT || value < 0 || value > 100) {
         return false;
     }
+    std::cout << "in setValue (pin: " << this->pin << ") (before lock)!\n";
     this->set_lock.lock();
+    std::cout << "in setValue (pin: " << this->pin << ") (after lock)!\n";
 
     this->value = value;
 
     if (this->use_fade_in == true || this->use_fade_out == true)
     {
+        std::cout << "setValue (pin: " << this->pin << "): use fade == TRUE !\n";
         if (this->fade_thread_active == false)
         {
+            std::cout << "setValue (pin: " << this->pin << "): fade_thread_active == FALSE !\n";
             this->fade_thread_active = true;
             std::thread fade_thread = std::thread(&LivePin::doFading, this);
             fade_thread.detach();
         }
+        else
+            std::cout << "setValue (pin: " << this->pin << "): fade_thread_active is already active !\n";
     }
     else
     {
@@ -78,6 +84,7 @@ bool LivePin::setValue(int value) {
 
 void LivePin::setFade(bool fade_in, bool fade_out)
 {
+    std::cout << "setFade(pin: " << this->pin << "): fade_in: " << fade_in << " - fade_out: " << fade_out << " !\n";
     this->use_fade_in = fade_in;
     this->use_fade_out = fade_out;
 }
