@@ -33,6 +33,13 @@
     </sizepolicy>
    </property>
    <layout class="QGridLayout" name="gridLayout_3">
+    <item row="0" column="0">
+     <widget class="QCheckBox" name="settingStayActive">
+      <property name="text">
+       <string>Server stay active after deconnection</string>
+      </property>
+     </widget>
+    </item>
     <item row="1" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
@@ -193,6 +200,9 @@
              <kerning>true</kerning>
             </font>
            </property>
+           <property name="toolTip">
+            <string>Select where to get audio data from</string>
+           </property>
            <property name="currentText">
             <string/>
            </property>
@@ -246,12 +256,18 @@
            </property>
           </widget>
          </item>
+         <item row="0" column="2" rowspan="2">
+          <widget class="QLCDNumber" name="audio_current_value_lcd"/>
+         </item>
          <item row="0" column="0">
           <widget class="QLabel" name="audio_max_label">
            <property name="font">
             <font>
              <pointsize>13</pointsize>
             </font>
+           </property>
+           <property name="toolTip">
+            <string>Max audio value since audio controller started</string>
            </property>
            <property name="text">
             <string>Max value: </string>
@@ -265,20 +281,11 @@
              <pointsize>13</pointsize>
             </font>
            </property>
+           <property name="toolTip">
+            <string>Min audio value since audio controller started</string>
+           </property>
            <property name="text">
             <string>Min value: </string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLabel" name="label_4">
-           <property name="font">
-            <font>
-             <pointsize>13</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>TextLabel</string>
            </property>
           </widget>
          </item>
@@ -294,8 +301,20 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="2" rowspan="2">
-          <widget class="QLCDNumber" name="audio_current_value_lcd"/>
+         <item row="0" column="1">
+          <widget class="QLabel" name="audio_raw_value_label">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>Original value without gain or multiplier</string>
+           </property>
+           <property name="text">
+            <string>Raw value: </string>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -303,9 +322,9 @@
         <property name="geometry">
          <rect>
           <x>720</x>
-          <y>90</y>
+          <y>50</y>
           <width>331</width>
-          <height>231</height>
+          <height>271</height>
          </rect>
         </property>
         <property name="minimumSize">
@@ -313,6 +332,9 @@
           <width>331</width>
           <height>231</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Select which output pin to be controller by audio controller</string>
         </property>
         <property name="widgetResizable">
          <bool>true</bool>
@@ -323,7 +345,7 @@
            <x>0</x>
            <y>0</y>
            <width>329</width>
-           <height>229</height>
+           <height>269</height>
           </rect>
          </property>
         </widget>
@@ -332,7 +354,7 @@
         <property name="geometry">
          <rect>
           <x>720</x>
-          <y>60</y>
+          <y>20</y>
           <width>331</width>
           <height>21</height>
          </rect>
@@ -348,6 +370,230 @@
         <property name="alignment">
          <set>Qt::AlignCenter</set>
         </property>
+       </widget>
+       <widget class="QGroupBox" name="live_audiio_setting_groupBox">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>340</y>
+          <width>711</width>
+          <height>171</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>Settings</string>
+        </property>
+        <widget class="QWidget" name="gridLayoutWidget">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>20</y>
+           <width>241</width>
+           <height>151</height>
+          </rect>
+         </property>
+         <layout class="QGridLayout" name="live_audio_setting_gridLayout">
+          <item row="1" column="0">
+           <widget class="QLabel" name="live_audio_mult_label">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>Multiplier: multiplier audio value by this value</string>
+            </property>
+            <property name="statusTip">
+             <string>Multiplier: multiplier audio value by this value</string>
+            </property>
+            <property name="text">
+             <string>Multiplier:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="live_audio_gain_label">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>Gain: Add this value to audio value</string>
+            </property>
+            <property name="statusTip">
+             <string>Gain: Add this value to audio value</string>
+            </property>
+            <property name="whatsThis">
+             <string/>
+            </property>
+            <property name="accessibleName">
+             <string/>
+            </property>
+            <property name="accessibleDescription">
+             <string/>
+            </property>
+            <property name="text">
+             <string>Gain:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="live_audio_gain_spinBox">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>Gain: Add this value to audio value</string>
+            </property>
+            <property name="statusTip">
+             <string>Gain: Add this value to audio value</string>
+            </property>
+            <property name="suffix">
+             <string>%</string>
+            </property>
+            <property name="prefix">
+             <string/>
+            </property>
+            <property name="minimum">
+             <number>-99</number>
+            </property>
+            <property name="singleStep">
+             <number>5</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="live_audio_mult_doubleSpinBox">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>Multiplier: multiplier audio value by this value</string>
+            </property>
+            <property name="statusTip">
+             <string>Multiplier: multiplier audio value by this value</string>
+            </property>
+            <property name="prefix">
+             <string/>
+            </property>
+            <property name="suffix">
+             <string/>
+            </property>
+            <property name="minimum">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>10.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="gridLayoutWidget_2">
+         <property name="geometry">
+          <rect>
+           <x>270</x>
+           <y>20</y>
+           <width>431</width>
+           <height>151</height>
+          </rect>
+         </property>
+         <layout class="QGridLayout" name="live_audio_setting_gridLayout2">
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="live_audio_max_value_change_spinBox">
+            <property name="toolTip">
+             <string>Cahnge the main output when this max value is reached</string>
+            </property>
+            <property name="statusTip">
+             <string>Cahnge the main output when this max value is reached</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="value">
+             <number>80</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="live_audio_max_value_change_checkBox">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>Cahnge the main output when this max value is reached</string>
+            </property>
+            <property name="statusTip">
+             <string>Cahnge the main output when this max value is reached</string>
+            </property>
+            <property name="text">
+             <string>Output change by max value</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="live_audio_linear_change_checkBox">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>Change the main output used in a linear way</string>
+            </property>
+            <property name="statusTip">
+             <string>Change the main output used in a linear way</string>
+            </property>
+            <property name="text">
+             <string>Linear output change</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QPushButton" name="live_audio_setting_reset_button">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>Reset all settings by default value</string>
+            </property>
+            <property name="statusTip">
+             <string>Reset all settings by default value</string>
+            </property>
+            <property name="text">
+             <string>Reset settings</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </widget>
       </widget>
       <widget class="QWidget" name="socket_tab">
@@ -424,13 +670,6 @@
         </item>
        </layout>
       </widget>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <widget class="QCheckBox" name="settingStayActive">
-      <property name="text">
-       <string>Server stay active after deconnection</string>
-      </property>
      </widget>
     </item>
    </layout>

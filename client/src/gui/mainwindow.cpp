@@ -219,3 +219,34 @@ void MainWindow::on_live_audio_controller_stopButton_clicked()
 {
     this->mode_audio_live->stopAudio();
 }
+
+void MainWindow::on_live_audio_gain_spinBox_valueChanged(int arg1)
+{
+    this->mode_audio_live->setGain(arg1);
+}
+
+void MainWindow::on_live_audio_mult_doubleSpinBox_valueChanged(double arg1)
+{
+    this->mode_audio_live->setMultiplier(arg1);
+}
+
+void MainWindow::on_live_audio_setting_reset_button_clicked()
+{
+    ui->live_audio_gain_spinBox->setValue(0);
+    ui->live_audio_mult_doubleSpinBox->setValue(1);
+}
+
+void MainWindow::on_live_audio_linear_change_checkBox_toggled(bool checked)
+{
+    this->mode_audio_live->setUseLinearChange(checked);
+}
+
+void MainWindow::on_live_audio_max_value_change_checkBox_toggled(bool checked)
+{
+    this->mode_audio_live->setUseMaxValueChange(checked);
+}
+
+void MainWindow::on_live_audio_max_value_change_spinBox_valueChanged(int arg1)
+{
+    this->mode_audio_live->setMaxValueChange(arg1);
+}

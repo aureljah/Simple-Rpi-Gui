@@ -2,7 +2,8 @@
 
 modeAudioLive::modeAudioLive(QWidget *live_audio_tab, modeLive *mode_live, serverApi *server_api)
     : live_audio_tab(live_audio_tab), mode_live(mode_live), server_api(server_api), audioInput(nullptr), buffer_process_thread(nullptr),
-    current_value(0), max_value(0), min_value(-1)
+    current_value(0), max_value(0), min_value(-1), gain(0), multiplier(1),
+    use_linear_change(false), use_max_value_change(false), max_value_change(80), last_time_max_change(0), main_output_linear_pin(-1)
 {
     this->changeStatus(AudioStatus::STOPPED);
     this->updateAudioGui();
@@ -19,6 +20,38 @@ modeAudioLive::modeAudioLive(QWidget *live_audio_tab, modeLive *mode_live, serve
 modeAudioLive::~modeAudioLive()
 {
 
+}
+
+void modeAudioLive::setGain(int gain)
+{
+    if (gain >= -99 && gain <= 99)
+        this->gain = gain;
+}
+void modeAudioLive::setMultiplier(double mult)
+{
+    if (mult > 0 && mult <= 10)
+        this->multiplier = mult;
+}
+void modeAudioLive::setUseLinearChange(bool checked)
+{
+    this->use_linear_change = checked;
+
+    // reset linear & max change
+    this->main_output_linear_pin = -1;
+    this->output_coef.clear();
+}
+void modeAudioLive::setUseMaxValueChange(bool checked)
+{
+    this->use_max_value_change = checked;
+
+    // reset linear & max change
+    this->main_output_linear_pin = -1;
+    this->output_coef.clear();
+}
+void modeAudioLive::setMaxValueChange(int value)
+{
+    if (value >= 1 && value <= 99)
+        this->max_value_change = value;
 }
 
 void modeAudioLive::startAudio(QAudioDeviceInfo inputDevice)
@@ -59,6 +92,7 @@ void modeAudioLive::stopAudio()
         audio_input->stop();
         delete audio_input;
     }
+    this->resetTelemetry();
     this->changeStatus(AudioStatus::STOPPED);
 }
 
@@ -237,15 +271,19 @@ void modeAudioLive::audioBufferToLevel(char *data, int len) {
     }
 }
 
-void modeAudioLive::updateAudioValue(int value)
+void modeAudioLive::updateAudioValue(int raw_value)
 {
-    // convert to %
-    //value = value - 128;
-    //value = qAbs(value);
-    //value = floor(((float)value / (float)128) * 100);
-    qInfo() << "updateAudioValue: value: " << value << "\n";
+    int value = raw_value * this->multiplier;
+    value += this->gain;
+    if (value > 100)
+        value = 100;
+    if (value < 0)
+        value = 0;
+
+    qInfo() << "updateAudioValue: value: " << value << "raw value: " << raw_value << "\n";
 
     this->current_value = value;
+    this->raw_value = raw_value;
     if (value < this->min_value || this->min_value == -1)
         this->min_value = value;
     if (value > this->max_value)
@@ -262,6 +300,7 @@ void modeAudioLive::useCheckedOutput()
     std::vector<int> output_pin_list;
     std::vector<int> output_value_list;
     std::vector<std::string> output_name_list;
+
     std::map<int, QCheckBox*>::iterator it = this->live_output_list.begin();
     while (it != this->live_output_list.end())
     {
@@ -281,7 +320,151 @@ void modeAudioLive::useCheckedOutput()
             this->mode_live->update_output_value(*it, this->current_value, true);
         }
     }
+    if (output_pin_list.size() < 1 || (output_pin_list.size() != output_value_list.size()))
+        return;
+
+    if (this->use_linear_change == true || this->use_max_value_change == true)
+    {
+        qInfo() << "use_linear_change is TRUE \n";
+        if (this->checkOutputCoef(output_pin_list) == true)
+        {
+            qInfo() << "checkOutputCoef is TRUE \n";
+            if (this->use_linear_change == true)
+                this->updateLinearChangeCoef();
+
+            if (this->use_max_value_change == true)
+                this->updateMaxValueChange();
+
+            for(size_t i = 0 ; i < output_pin_list.size() ; i++)
+            {
+                output_value_list[i] = floor(this->current_value * this->output_coef[output_pin_list[i]]);
+                qInfo() << "using output_coef: pin: " << output_pin_list[i] << "-  current_value: " << this->current_value << " - coef: " << this->output_coef[output_pin_list[i]] << "\n";
+            }
+        }
+    }
+
     this->server_api->liveSetSeveralOutputServer(output_pin_list, output_value_list, output_name_list);
+}
+
+bool modeAudioLive::checkOutputCoef(std::vector<int> output_list)
+{
+    // delete old and build new coef list
+    if (output_list.size() < 1)
+        return false;
+
+    bool same = true;
+    if (output_list.size() == this->output_coef.size())
+    {
+        for(std::vector<int>::iterator it = output_list.begin(); it != output_list.end(); it++)
+        {
+            if (this->output_coef.find(*it) == this->output_coef.end())
+            {
+                same = false;
+                break;
+            }
+        }
+    }
+    else
+        same = false;
+
+    if (same == false) // not same => reset
+    {
+        qInfo() << "checkOutputCoef will reset\n";
+        this->output_coef.clear();
+        for(std::vector<int>::iterator it = output_list.begin(); it != output_list.end(); it++)
+            this->output_coef[*it] = 0;
+        this->main_output_linear_pin = this->output_coef.begin()->first;
+        this->output_coef.begin()->second = 1;
+        return false;
+    }
+    return true;
+}
+
+void modeAudioLive::updateLinearChangeCoef()
+{
+    if (this->output_coef.size() < 1)
+        return;
+
+    for(std::map<int, float>::iterator it = this->output_coef.begin(); it != this->output_coef.end(); it++)
+    {
+        if (it->first == this->main_output_linear_pin)
+        {
+            bool need_change_main_pin = false;
+            it->second -= LINEAR_CHANGE_RATE;
+            if (it->second < 0)
+            {
+                it->second = 0;
+                need_change_main_pin = true;
+            }
+
+            it++;
+            if (it == this->output_coef.end())
+                it = this->output_coef.begin();
+
+            if (need_change_main_pin == true)
+                this->main_output_linear_pin = it->first;
+
+            it->second += LINEAR_CHANGE_RATE;
+            if (it->second > 1)
+                it->second = 1;
+            break;
+        }
+    }
+}
+
+void modeAudioLive::updateMaxValueChange()
+{
+    if (this->output_coef.size() < 1)
+        return;
+
+    if (this->current_value >= this->max_value_change)
+    {
+        qint64 cur_time = QDateTime::currentMSecsSinceEpoch();
+        if (cur_time >= this->last_time_max_change + MAX_VALUE_CHANGE_RATE_COOLDOWN_MS) {
+            this->last_time_max_change = cur_time;
+        }
+        else
+            return;
+
+        for(std::map<int, float>::iterator it = this->output_coef.begin(); it != this->output_coef.end(); it++)
+        {
+            if (it->first == this->main_output_linear_pin)
+            {
+                float reminder = 0;
+                it->second -= MAX_VALUE_CHANGE_RATE;
+                if (it->second < 0)
+                {
+                    reminder = qAbs(it->second);
+                    it->second = 0;
+                }
+
+                it++;
+                if (it == this->output_coef.end())
+                    it = this->output_coef.begin();
+
+                if (reminder > 0)
+                {
+                    this->main_output_linear_pin = it->first;
+                    it->second = 1;
+                    it->second -= reminder;
+                    it++;
+                    if (it == this->output_coef.end())
+                        it = this->output_coef.begin();
+                    it->second += reminder;
+                    if (it->second > 100)
+                        it->second = 100;
+                }
+                else
+                {
+                    it->second += MAX_VALUE_CHANGE_RATE;
+                    if (it->second > 100)
+                        it->second = 100;
+                }
+
+                break;
+            }
+        }
+    }
 }
 
 void modeAudioLive::updateAudioGui() {
@@ -292,6 +475,10 @@ void modeAudioLive::updateAudioGui() {
     QLabel* min_label = live_audio_tab->findChild<QLabel*>("audio_min_label", Qt::FindChildrenRecursively);
     if (min_label)
         min_label->setText("Min value: " + QString::fromStdString(std::to_string(this->min_value)));
+
+    QLabel* raw_label = live_audio_tab->findChild<QLabel*>("audio_raw_value_label", Qt::FindChildrenRecursively);
+    if (raw_label)
+        raw_label->setText("Min value: " + QString::fromStdString(std::to_string(this->raw_value)));
 
     QProgressBar* progress = live_audio_tab->findChild<QProgressBar*>("audio_current_value_progress", Qt::FindChildrenRecursively);
     if (progress)

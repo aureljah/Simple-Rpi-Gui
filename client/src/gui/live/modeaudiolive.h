@@ -32,8 +32,12 @@
 
 //#define PCM_CHANNEL_COUNT 1
 #define PCM_SAMPLE_SIZE 16
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 2048
 #define UPDATE_INTERVAL_MS 50 // 20 => 0,02sec => 50 time per seconde
+
+#define LINEAR_CHANGE_RATE 0.02
+#define MAX_VALUE_CHANGE_RATE 0.5
+#define MAX_VALUE_CHANGE_RATE_COOLDOWN_MS 500
 
 class modeAudioLive : public QObject
 {
@@ -54,6 +58,12 @@ public:
     void stopAudio();
     AudioStatus getStatus() {return this->status;};
 
+    void setGain(int gain);
+    void setMultiplier(double mult);
+    void setUseLinearChange(bool checked);
+    void setUseMaxValueChange(bool checked);
+    void setMaxValueChange(int value);
+
 public slots:
     void updateOutputSelect();
 
@@ -66,8 +76,12 @@ private:
     void setMaxAplitude();
     void audioBufferToLevel(char *data, int len);
 
+    bool checkOutputCoef(std::vector<int> output_list);
+    void updateLinearChangeCoef();
+    void updateMaxValueChange();
+
 private slots:
-    void updateAudioValue(int value);
+    void updateAudioValue(int raw_value);
     void buffer_processing();
 
 signals:
@@ -91,9 +105,22 @@ private:
 
     /* value & telemetry */
     int current_value;
+    int raw_value;
 
     int max_value;
     int min_value;
+
+    /* settings */
+    int gain;
+    double multiplier;
+
+    bool use_linear_change;
+    bool use_max_value_change;
+    int max_value_change;
+    qint64 last_time_max_change;
+    // coef for each output (used by linear and max value change)
+    std::map<int, float> output_coef;
+    int main_output_linear_pin;
 
     //std::map<QString, int> live_output_list;
     std::map<int, QCheckBox*> live_output_list;

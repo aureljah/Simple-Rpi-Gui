@@ -56,8 +56,13 @@ private slots:
     void on_tabWidget_currentChanged(int index);
 
     void on_live_audio_controller_startButton_clicked();
-
     void on_live_audio_controller_stopButton_clicked();
+    void on_live_audio_gain_spinBox_valueChanged(int arg1);
+    void on_live_audio_mult_doubleSpinBox_valueChanged(double arg1);
+    void on_live_audio_setting_reset_button_clicked();
+    void on_live_audio_linear_change_checkBox_toggled(bool checked);
+    void on_live_audio_max_value_change_checkBox_toggled(bool checked);
+    void on_live_audio_max_value_change_spinBox_valueChanged(int arg1);
 
 private:
     Ui::MainWindow *ui;
