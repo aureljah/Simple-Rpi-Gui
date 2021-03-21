@@ -14,6 +14,10 @@ MainWindow::MainWindow(QWidget *parent) :
                      this, &MainWindow::writeToDebugScreen);
     QObject::connect(this->server_api, &serverApi::stay_alive_setting,
                      this, &MainWindow::setServerStayAlive);
+    QObject::connect(this->server_api, &serverApi::use_fade_in_setting,
+                     this, &MainWindow::setFadeIn);
+    QObject::connect(this->server_api, &serverApi::use_fade_out_setting,
+                     this, &MainWindow::setFadeOut);
     QObject::connect(this->server_api, &serverApi::error_500,
                      this, &MainWindow::error_500_handler);
 
@@ -133,6 +137,8 @@ void MainWindow::onConnected()
 
     this->server_api->getServerStatus();
     this->server_api->getServerSetting();
+
+    this->mode_audio_live->updateOutputSelect();
 }
 
 void MainWindow::error_500_handler(std::string fct_name, std::string msg)
@@ -249,4 +255,32 @@ void MainWindow::on_live_audio_max_value_change_checkBox_toggled(bool checked)
 void MainWindow::on_live_audio_max_value_change_spinBox_valueChanged(int arg1)
 {
     this->mode_audio_live->setMaxValueChange(arg1);
+}
+
+void MainWindow::setFadeIn(bool value)
+{
+    this->use_fade_in = value;
+    ui->live_use_fade_in_checkBox->setChecked(value);
+}
+void MainWindow::on_live_use_fade_in_checkBox_toggled(bool checked)
+{
+    this->use_fade_in = checked;
+    if (checked == true)
+        this->server_api->setServerSetting("use_fade_in", "true");
+    else
+        this->server_api->setServerSetting("use_fade_in", "false");
+}
+
+void MainWindow::setFadeOut(bool value)
+{
+    this->use_fade_out = value;
+    ui->live_use_fade_out_checkBox->setChecked(value);
+}
+void MainWindow::on_live_use_fade_out_checkBox_toggled(bool checked)
+{
+    this->use_fade_out = checked;
+    if (checked == true)
+        this->server_api->setServerSetting("use_fade_out", "true");
+    else
+        this->server_api->setServerSetting("use_fade_out", "false");
 }

@@ -4,8 +4,9 @@
 #include <cstdio>
 #include <string>
 
-LiveMode::LiveMode(int base_port)
-    : input_monitor_running(true), monitor_poll_time(DEFAULT_MONITOR_POLL_TIME)
+LiveMode::LiveMode(int base_port, bool use_fade_in, bool use_fade_out)
+    : input_monitor_running(true), monitor_poll_time(DEFAULT_MONITOR_POLL_TIME),
+    use_fade_in(use_fade_in), use_fade_out(use_fade_out)
 {
     // get client socket
     this->rpi = new GpioWrapper();
@@ -75,6 +76,7 @@ std::string LiveMode::setOutput(int pin, int value, std::string name)
 
         LivePin *new_output = new LivePin(this->rpi, pin, GPIO_TYPE::OUTPUT, name, value);
         this->outputs[pin] = new_output;
+        new_output->setFade(this->use_fade_in, this->use_fade_out);
     }
     return ""; // OK
 }
@@ -112,6 +114,27 @@ std::string LiveMode::delPin(int pin)
         delete old_pin;
     }
     return ""; // OK
+}
+
+void LiveMode::setFade(bool fade_in, bool fade_out)
+{
+    bool changed = false;
+    if (this->use_fade_in != fade_in)
+    {
+        changed = true;
+        this->use_fade_in = fade_in;
+    }
+    if (this->use_fade_out != fade_out)
+    {
+        changed = true;
+        this->use_fade_out = fade_out;
+    }
+
+    if (changed == true)
+    {
+        for(std::map<int, LivePin*>::iterator it = this->outputs.begin(); it != this->outputs.end(); it++)
+            it->second->setFade(this->use_fade_in, this->use_fade_out);
+    }
 }
 
 void LiveMode::input_monitor(int base_port)

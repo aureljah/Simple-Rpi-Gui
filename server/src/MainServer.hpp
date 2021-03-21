@@ -54,6 +54,10 @@ private:
     // general settings
     bool setting_stay_active; // server will stay active and dont delete/stop live or script after client disconnect
 
+    // live mode settings
+    bool use_fade_in;
+    bool use_fade_out;
+
     int base_port;
     //ISocket *sock; // server socket (accept)
     //ISocket *client; // client socket (connected)

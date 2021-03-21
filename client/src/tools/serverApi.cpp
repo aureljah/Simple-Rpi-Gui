@@ -129,8 +129,8 @@ void serverApi::slot_sendAndCheckBasicResp(std::string cmd, std::string fct_name
     this->thread_count += 1;
     this->thread_count_lock.unlock();
 
-    std::thread *th = new std::thread(&serverApi::sendAndCheckBasicResp, this, cmd, fct_name);
-    th->detach();
+    std::thread th = std::thread(&serverApi::sendAndCheckBasicResp, this, cmd, fct_name);
+    th.detach();
 }
 
 /*
@@ -232,12 +232,26 @@ bool serverApi::getServerSetting()
                     emit stay_alive_setting(true);
                 else if (resp_array[i] == "false")
                     emit stay_alive_setting(false);
-                else // invalid
-                    break;
-
+            }
+            else if (resp_array[i] == "use_fade_in" && resp_array.size() > (i + 1))
+            {
+                i++;
+                if (resp_array[i] == "true")
+                    emit use_fade_in_setting(true);
+                else if (resp_array[i] == "false")
+                    emit use_fade_in_setting(false);
+            }
+            else if (resp_array[i] == "use_fade_out" && resp_array.size() > (i + 1))
+            {
+                i++;
+                if (resp_array[i] == "true")
+                    emit use_fade_out_setting(true);
+                else if (resp_array[i] == "false")
+                    emit use_fade_out_setting(false);
             }
             else // invalid
                 break;
+            i++;
         }
     }
     return true;
@@ -246,7 +260,7 @@ bool serverApi::getServerSetting()
 void serverApi::setServerSetting(std::string setting, std::string value)
 {
     std::string cmd = "SETTING";
-    if (setting == "stay_active")
+    if (setting == "stay_active" || setting == "use_fade_in" || setting == "use_fade_out")
     {
         cmd += " " + setting;
         if (value == "true" || value == "false")

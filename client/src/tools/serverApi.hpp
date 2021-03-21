@@ -50,6 +50,8 @@ signals:
     void input_value_changed(int, int);
 
     void stay_alive_setting(bool);
+    void use_fade_in_setting(bool);
+    void use_fade_out_setting(bool);
 
     void error_500(std::string, std::string);
     void send_recv_server_msg(std::string, std::string);

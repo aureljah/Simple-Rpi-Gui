@@ -4,7 +4,11 @@
 #include <iostream>
 #include <exception>
 #include <string>
+#include <thread>
 #include <mutex>
+#include <unistd.h>
+
+#define FADE_RATE_MS 10 // 10ms => 0 to 100 in 1sec
 
 namespace GPIO_TYPE {
     enum gpio_type {
@@ -28,13 +32,26 @@ public:
     bool setName(std::string name);
     bool setValue(int value);
 
+    void setFade(bool fade_in, bool fade_out);
+
+private:
+    void doFading();
+
 private:
     IGpioWrapper *rpi;
 
     int pin;
     GPIO_TYPE::gpio_type type;
     std::string name;
-    int value;
+    int value; // or target value for fade feature
+
+    // for fade in/out feature
+    int real_value; // real value that we incr/decr to target value when fade active
+    //std::thread fade_thread;
+    bool fade_thread_active;
+
+    bool use_fade_in;
+    bool use_fade_out;
 
     std::mutex set_lock;
 };

@@ -36,6 +36,8 @@ public:
     void second_thread_test();
 
     void setServerStayAlive(bool value);
+    void setFadeIn(bool value);
+    void setFadeOut(bool value);
 
 signals:
     void new_serv_msg(QString msg);
@@ -52,6 +54,9 @@ private slots:
     void on_live_add_input_pushButton_clicked();
 
     void on_settingStayActive_toggled(bool checked);
+
+    void on_live_use_fade_in_checkBox_toggled(bool checked);
+    void on_live_use_fade_out_checkBox_toggled(bool checked);
 
     void on_tabWidget_currentChanged(int index);
 
@@ -74,6 +79,8 @@ private:
 
     /* setting */
     bool server_stay_alive;
+    bool use_fade_in;
+    bool use_fade_out;
 
     //std::thread *t2;
     std::mutex lock_text_screen;

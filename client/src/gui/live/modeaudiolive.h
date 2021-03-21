@@ -37,7 +37,7 @@
 
 #define LINEAR_CHANGE_RATE 0.02
 #define MAX_VALUE_CHANGE_RATE 0.5
-#define MAX_VALUE_CHANGE_RATE_COOLDOWN_MS 500
+#define MAX_VALUE_CHANGE_RATE_COOLDOWN_MS 250
 
 class modeAudioLive : public QObject
 {
@@ -84,6 +84,8 @@ private slots:
     void updateAudioValue(int raw_value);
     void buffer_processing();
 
+    void outputSelectedChanged();
+
 signals:
     void current_value_update(int value);
     //void current_value_update(char *data, int len);
@@ -122,12 +124,7 @@ private:
     std::map<int, float> output_coef;
     int main_output_linear_pin;
 
-    //std::map<QString, int> live_output_list;
     std::map<int, QCheckBox*> live_output_list;
-    //std::map<QString, int> checked_live_output;
-
-    //QVBoxLayout *out_vlayout;
-    //std::map<QString, dynamicOutput*> dyn_o_widgets;
 };
 
 #endif // MODEAUDIOLIVE_H

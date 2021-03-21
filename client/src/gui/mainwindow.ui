@@ -33,17 +33,10 @@
     </sizepolicy>
    </property>
    <layout class="QGridLayout" name="gridLayout_3">
-    <item row="0" column="0">
-     <widget class="QCheckBox" name="settingStayActive">
-      <property name="text">
-       <string>Server stay active after deconnection</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
+    <item row="7" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="live_tab">
        <property name="sizePolicy">
@@ -74,7 +67,7 @@
              <x>0</x>
              <y>0</y>
              <width>525</width>
-             <height>448</height>
+             <height>446</height>
             </rect>
            </property>
           </widget>
@@ -91,7 +84,7 @@
              <x>0</x>
              <y>0</y>
              <width>524</width>
-             <height>448</height>
+             <height>446</height>
             </rect>
            </property>
           </widget>
@@ -527,6 +520,9 @@
             <property name="minimum">
              <number>1</number>
             </property>
+            <property name="maximum">
+             <number>101</number>
+            </property>
             <property name="value">
              <number>80</number>
             </property>
@@ -671,6 +667,31 @@
        </layout>
       </widget>
      </widget>
+    </item>
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="settingStayActive">
+        <property name="text">
+         <string>Server stay active after deconnection</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QCheckBox" name="live_use_fade_in_checkBox">
+        <property name="text">
+         <string>Use fade In effect</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QCheckBox" name="live_use_fade_out_checkBox">
+        <property name="text">
+         <string>Use fade Out effect</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>

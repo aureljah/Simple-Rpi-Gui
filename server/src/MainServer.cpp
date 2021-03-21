@@ -7,7 +7,8 @@
 #include <unistd.h>
 
 MainServer::MainServer()
-    : live_mode(nullptr), setting_stay_active(true)
+    : live_mode(nullptr), setting_stay_active(true),
+    use_fade_in(false), use_fade_out(false)
 {
 
 }
@@ -179,6 +180,11 @@ std::string MainServer::getSettingCommand()
     settings += " stay_active ";
     settings += this->boolToString(this->setting_stay_active);
 
+    settings += " use_fade_in ";
+    settings += this->boolToString(this->use_fade_in);
+    settings += " use_fade_out ";
+    settings += this->boolToString(this->use_fade_out);
+
     return settings;
 }
 
@@ -191,6 +197,28 @@ std::string MainServer::setSettingCommand(std::string setting, std::string value
             this->setting_stay_active = this->stringToBool(value);
         else
             throw std::runtime_error("SETTING stay_active: invalid value");
+    }
+    else if (setting == "use_fade_in")
+    {
+        if (this->isBoolStringValid(value) == true)
+        {
+            this->use_fade_in = this->stringToBool(value);
+            if (this->live_mode != nullptr)
+                this->live_mode->setFade(this->use_fade_in, this->use_fade_out);
+        }
+        else
+            throw std::runtime_error("SETTING use_fade_in: invalid value");
+    }
+    else if (setting == "use_fade_out")
+    {
+        if (this->isBoolStringValid(value) == true)
+        {
+            this->use_fade_out = this->stringToBool(value);
+            if (this->live_mode != nullptr)
+                this->live_mode->setFade(this->use_fade_in, this->use_fade_out);
+        }
+        else
+            throw std::runtime_error("SETTING use_fade_out: invalid value");
     }
     else
         throw std::runtime_error("SETTING: setting <" + setting + "> doesn't exist");
@@ -244,7 +272,7 @@ bool MainServer::useModeLive()
 {
     // del mode script if active
     if (this->live_mode == nullptr)
-        this->live_mode = new LiveMode(this->base_port);
+        this->live_mode = new LiveMode(this->base_port, this->use_fade_in, this->use_fade_out);
 
     return true;
 }

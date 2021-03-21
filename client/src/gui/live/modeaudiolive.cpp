@@ -37,20 +37,20 @@ void modeAudioLive::setUseLinearChange(bool checked)
     this->use_linear_change = checked;
 
     // reset linear & max change
-    this->main_output_linear_pin = -1;
-    this->output_coef.clear();
+    //this->main_output_linear_pin = -1;
+    //this->output_coef.clear();
 }
 void modeAudioLive::setUseMaxValueChange(bool checked)
 {
     this->use_max_value_change = checked;
 
     // reset linear & max change
-    this->main_output_linear_pin = -1;
-    this->output_coef.clear();
+    //this->main_output_linear_pin = -1;
+    //this->output_coef.clear();
 }
 void modeAudioLive::setMaxValueChange(int value)
 {
-    if (value >= 1 && value <= 99)
+    if (value >= 1 && value <= 101)
         this->max_value_change = value;
 }
 
@@ -93,6 +93,8 @@ void modeAudioLive::stopAudio()
         delete audio_input;
     }
     this->resetTelemetry();
+    this->output_coef.clear();
+    this->main_output_linear_pin = -1;
     this->changeStatus(AudioStatus::STOPPED);
 }
 
@@ -116,10 +118,8 @@ void modeAudioLive::updateOutputSelect()
                 check->setText(it->first);
                 output_scrollArea->layout()->addWidget(check);
             }
-            /*QObject::connect(check, &QCheckBox::toggled,
-                             this, &modeAudioLive::outputSelectedChanged);*/
         }
-        qInfo() << "updateOutputSelect: finsihed add and update title: live_output_list.size: " << this->live_output_list.size() << "\n";
+        //qInfo() << "updateOutputSelect: finsihed add and update title: live_output_list.size: " << this->live_output_list.size() << "\n";
         // remove old
         std::map<int, QCheckBox*>::iterator it = this->live_output_list.begin();
         while (it != this->live_output_list.end()) {
@@ -323,18 +323,17 @@ void modeAudioLive::useCheckedOutput()
     if (output_pin_list.size() < 1 || (output_pin_list.size() != output_value_list.size()))
         return;
 
-    if (this->use_linear_change == true || this->use_max_value_change == true)
+    if (this->checkOutputCoef(output_pin_list) == true)
     {
-        qInfo() << "use_linear_change is TRUE \n";
-        if (this->checkOutputCoef(output_pin_list) == true)
+        qInfo() << "checkOutputCoef is TRUE \n";
+        if (this->use_linear_change == true)
+            this->updateLinearChangeCoef();
+
+        if (this->use_max_value_change == true)
+            this->updateMaxValueChange();
+
+        if (this->use_linear_change == true || this->use_max_value_change == true)
         {
-            qInfo() << "checkOutputCoef is TRUE \n";
-            if (this->use_linear_change == true)
-                this->updateLinearChangeCoef();
-
-            if (this->use_max_value_change == true)
-                this->updateMaxValueChange();
-
             for(size_t i = 0 ; i < output_pin_list.size() ; i++)
             {
                 output_value_list[i] = floor(this->current_value * this->output_coef[output_pin_list[i]]);
@@ -370,6 +369,7 @@ bool modeAudioLive::checkOutputCoef(std::vector<int> output_list)
     if (same == false) // not same => reset
     {
         qInfo() << "checkOutputCoef will reset\n";
+        this->outputSelectedChanged();
         this->output_coef.clear();
         for(std::vector<int>::iterator it = output_list.begin(); it != output_list.end(); it++)
             this->output_coef[*it] = 0;
@@ -515,6 +515,26 @@ void modeAudioLive::changeStatus(AudioStatus status, QString added_text)
             status_str += " - " + added_text;
 
         status_label->setText("Status: " + status_str);
+    }
+}
+
+void modeAudioLive::outputSelectedChanged()
+{
+    // put the unchecked pin to 0
+    for(std::map<int, float>::iterator it = this->output_coef.begin(); it != this->output_coef.end(); it++)
+    {
+        std::map<int, QCheckBox*>::iterator it_check_list = this->live_output_list.begin();
+        while (it_check_list != this->live_output_list.end())
+        {
+            if (it->first == it_check_list->first)
+            {
+                if (it_check_list->second->isChecked() == false)
+                    this->mode_live->update_output_value(it->first, 0, false);
+
+                break;
+            }
+            it_check_list++;
+        }
     }
 }
 
