@@ -3,7 +3,7 @@
 
 LivePin::LivePin(IGpioWrapper *rpi, int pin, GPIO_TYPE::gpio_type type, std::string name, int value) 
     : rpi(rpi), pin(pin), type(type), name(name), value(value), real_value(value),
-    use_fade_in(false), use_fade_out(false)
+    fade_thread_active(false), use_fade_in(false), use_fade_out(false)
 {
     if (this->type == GPIO_TYPE::INPUT) {
         this->rpi->setGpioModeInput(this->pin);
