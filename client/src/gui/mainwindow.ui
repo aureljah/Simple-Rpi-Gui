@@ -143,7 +143,7 @@
          <rect>
           <x>10</x>
           <y>10</y>
-          <width>365</width>
+          <width>411</width>
           <height>150</height>
          </rect>
         </property>
@@ -167,7 +167,7 @@
           <widget class="QLabel" name="live_audio_status_label">
            <property name="font">
             <font>
-             <pointsize>14</pointsize>
+             <pointsize>13</pointsize>
             </font>
            </property>
            <property name="text">

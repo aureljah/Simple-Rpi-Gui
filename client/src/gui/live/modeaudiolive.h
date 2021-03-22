@@ -69,7 +69,7 @@ public slots:
     void updateOutputSelect();
 
 private:
-    void setUpAudio(QAudioDeviceInfo inputDevice);
+    bool setUpAudio(QAudioDeviceInfo inputDevice);
     void useCheckedOutput();
     void updateAudioGui();
     void changeStatus(AudioStatus status, QString added_text = "");
@@ -79,6 +79,8 @@ private:
     bool checkOutputCoef(std::vector<int> output_list);
     void updateLinearChangeCoef();
     void updateMaxValueChange();
+
+    void printSelectedFormat();
 
 private slots:
     void updateAudioValue(int raw_value);

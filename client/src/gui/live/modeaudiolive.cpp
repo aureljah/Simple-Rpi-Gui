@@ -72,8 +72,10 @@ void modeAudioLive::startAudio(QAudioDeviceInfo inputDevice)
 
     this->resetTelemetry();
 
-    this->setUpAudio(inputDevice);
-    this->changeStatus(AudioStatus::RUNNING);
+    if (this->setUpAudio(inputDevice) == false)
+        this->changeStatus(AudioStatus::STOPPED, "FORMAT NOT SUPPORTED");
+    else
+        this->changeStatus(AudioStatus::RUNNING);
 }
 
 void modeAudioLive::stopAudio()
@@ -148,7 +150,7 @@ void modeAudioLive::updateOutputSelect()
     }
 }
 
-void modeAudioLive::setUpAudio(QAudioDeviceInfo inputDevice)
+bool modeAudioLive::setUpAudio(QAudioDeviceInfo inputDevice)
 {
     this->formatAudio.setSampleRate(8000);
     this->formatAudio.setChannelCount(1);
@@ -160,7 +162,13 @@ void modeAudioLive::setUpAudio(QAudioDeviceInfo inputDevice)
     {
         qWarning() << "modeAudioLive WARNING: Format not supported\n";
         this->formatAudio = inputDevice.nearestFormat(this->formatAudio);
+        if (inputDevice.isFormatSupported(this->formatAudio) == false)
+        {
+            qWarning() << "modeAudioLive WARNING: Nearest format is also not supported\n";
+            return false;
+        }
     }
+    this->printSelectedFormat();
     this->setMaxAplitude();
 
     this->audioInput = new QAudioInput(inputDevice, this->formatAudio, this);
@@ -176,6 +184,17 @@ void modeAudioLive::setUpAudio(QAudioDeviceInfo inputDevice)
     this->audioDevice->open(QIODevice::ReadOnly);
     this->buffer_thread_running = true;
     this->buffer_process_thread = new std::thread(&modeAudioLive::buffer_processing, this);
+    return true;
+}
+
+void modeAudioLive::printSelectedFormat()
+{
+    qInfo() << "Selected format sampleRate:" << this->formatAudio.sampleRate() << "\n";
+    qInfo() << "Selected format sampleSize:" << this->formatAudio.sampleSize() << "\n";
+    qInfo() << "Selected format sampleType:" << this->formatAudio.sampleType() << "\n";
+    qInfo() << "Selected format channelCount:" << this->formatAudio.channelCount() << "\n";
+    qInfo() << "Selected format byteOrder:" << this->formatAudio.byteOrder() << "\n";
+    qInfo() << "Selected format codec:" << this->formatAudio.codec() << "\n";
 }
 
 void modeAudioLive::buffer_processing()
