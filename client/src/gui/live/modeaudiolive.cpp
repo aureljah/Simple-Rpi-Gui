@@ -208,7 +208,7 @@ void modeAudioLive::buffer_processing()
     char *buffer = new char[BUFFER_SIZE + 2];
     while (this->buffer_thread_running)
     {
-        //qint64 bytesReady = this->audioInput->bytesReady();
+        qint64 bytesReady = this->audioInput->bytesReady();
 
         for (int i = 0 ; i < BUFFER_SIZE + 2; i++)
         {   buffer[i] = 0;  }
@@ -216,7 +216,7 @@ void modeAudioLive::buffer_processing()
         qint64 readed = this->audioDevice->read(buffer, BUFFER_SIZE);
         if (readed > 0)
         {
-            //qInfo() << "buffer_processing: readed: " << readed << " - bytesReady: " << bytesReady << "\n";
+            qInfo() << "buffer_processing: readed: " << readed << " - bytesReady: " << bytesReady << "\n";
 
             //emit current_value_update(buffer, readed);
             qint64 cur_time = QDateTime::currentMSecsSinceEpoch();
@@ -237,7 +237,7 @@ void modeAudioLive::audioBufferToLevel(char *data, int len) {
         Q_ASSERT(this->formatAudio.sampleSize() % 8 == 0);
         const int channelBytes = this->formatAudio.sampleSize() / 8;
         const int sampleBytes = this->formatAudio.channelCount() * channelBytes;
-        Q_ASSERT(len % sampleBytes == 0);
+        //Q_ASSERT(len % sampleBytes == 0);
         const int numSamples = len / sampleBytes;
 
         quint32 maxValue = 0;
@@ -248,14 +248,14 @@ void modeAudioLive::audioBufferToLevel(char *data, int len) {
                 quint32 value = 0;
 
                 if (this->formatAudio.sampleSize() == 8 && this->formatAudio.sampleType() == QAudioFormat::UnSignedInt) {
-                    value = *reinterpret_cast<const quint8*>(ptr);
+                    value = qAbs(*reinterpret_cast<const quint8*>(ptr) - 127);
                 } else if (this->formatAudio.sampleSize() == 8 && this->formatAudio.sampleType() == QAudioFormat::SignedInt) {
                     value = qAbs(*reinterpret_cast<const qint8*>(ptr));
                 } else if (this->formatAudio.sampleSize() == 16 && this->formatAudio.sampleType() == QAudioFormat::UnSignedInt) {
                     if (this->formatAudio.byteOrder() == QAudioFormat::LittleEndian)
-                        value = qFromLittleEndian<quint16>(ptr);
+                        value = qAbs(qFromLittleEndian<quint16>(ptr) - 32767);
                     else
-                        value = qFromBigEndian<quint16>(ptr);
+                        value = qAbs(qFromBigEndian<quint16>(ptr) - 32767);
                 } else if (this->formatAudio.sampleSize() == 16 && this->formatAudio.sampleType() == QAudioFormat::SignedInt) {
                     if (this->formatAudio.byteOrder() == QAudioFormat::LittleEndian)
                         value = qAbs(qFromLittleEndian<qint16>(ptr));
@@ -263,9 +263,9 @@ void modeAudioLive::audioBufferToLevel(char *data, int len) {
                         value = qAbs(qFromBigEndian<qint16>(ptr));
                 } else if (this->formatAudio.sampleSize() == 32 && this->formatAudio.sampleType() == QAudioFormat::UnSignedInt) {
                     if (this->formatAudio.byteOrder() == QAudioFormat::LittleEndian)
-                        value = qFromLittleEndian<quint32>(ptr);
+                        value = qAbs(qFromLittleEndian<quint32>(ptr) - 0x7fffffff);
                     else
-                        value = qFromBigEndian<quint32>(ptr);
+                        value = qAbs(qFromBigEndian<quint32>(ptr) - 0x7fffffff);
                 } else if (this->formatAudio.sampleSize() == 32 && this->formatAudio.sampleType() == QAudioFormat::SignedInt) {
                     if (this->formatAudio.byteOrder() == QAudioFormat::LittleEndian)
                         value = qAbs(qFromLittleEndian<qint32>(ptr));
