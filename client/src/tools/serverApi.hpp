@@ -15,7 +15,7 @@
 #include <map>
 #include <vector>
 
-#define THREAD_LIMIT 10
+#define THREAD_LIMIT 4
 
 #define ERROR_MSGBOX_TIMEOUT 5000 // 5 sec
 

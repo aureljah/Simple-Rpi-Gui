@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QStyle>
 #include <QDesktopWidget>
+#include <QKeyEvent>
 #include "Socket.hpp"
 
 namespace Ui {
@@ -27,8 +28,11 @@ signals:
 
 private slots:
     void on_buttonBox_accepted();
-
     void on_buttonBox_rejected();
+
+protected:
+    void tryConnect();
+    bool eventFilter(QObject* obj, QEvent* event);
 
 private:
     Ui::connection *ui;
