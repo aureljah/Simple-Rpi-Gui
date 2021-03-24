@@ -213,7 +213,13 @@ void modeAudioLive::buffer_processing()
         for (int i = 0 ; i < BUFFER_SIZE + 2; i++)
         {   buffer[i] = 0;  }
 
-        qint64 readed = this->audioDevice->read(buffer, BUFFER_SIZE);
+        qint64 readed = 0;
+        while (readed < BUFFER_SIZE)
+        {
+            if (this->audioDevice->getChar(buffer + readed) == true)
+                readed += 1;
+        }
+        //qint64 readed = this->audioDevice->read(buffer, BUFFER_SIZE);
         if (readed > 0)
         {
             qInfo() << "buffer_processing: readed: " << readed << " - bytesReady: " << bytesReady << "\n";
