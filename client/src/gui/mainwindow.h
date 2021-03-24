@@ -69,6 +69,7 @@ private slots:
     void on_live_audio_max_value_change_checkBox_toggled(bool checked);
     void on_live_audio_max_value_change_spinBox_valueChanged(int arg1);
     void on_audio_reset_telemetry_button_clicked();
+    void on_live_audio_normalize_checkBox_toggled(bool checked);
 
 private:
     Ui::MainWindow *ui;

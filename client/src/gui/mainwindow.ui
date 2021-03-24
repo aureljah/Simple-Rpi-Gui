@@ -33,6 +33,31 @@
     </sizepolicy>
    </property>
    <layout class="QGridLayout" name="gridLayout_3">
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="1">
+       <widget class="QCheckBox" name="live_use_fade_in_checkBox">
+        <property name="text">
+         <string>Use fade In effect</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="settingStayActive">
+        <property name="text">
+         <string>Server stay active after deconnection</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QCheckBox" name="live_use_fade_out_checkBox">
+        <property name="text">
+         <string>Use fade Out effect</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
     <item row="7" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
@@ -253,7 +278,7 @@
           <widget class="QLabel" name="audio_max_label">
            <property name="font">
             <font>
-             <pointsize>13</pointsize>
+             <pointsize>12</pointsize>
             </font>
            </property>
            <property name="toolTip">
@@ -268,7 +293,7 @@
           <widget class="QLabel" name="audio_min_label">
            <property name="font">
             <font>
-             <pointsize>13</pointsize>
+             <pointsize>12</pointsize>
             </font>
            </property>
            <property name="toolTip">
@@ -372,7 +397,7 @@
          <rect>
           <x>10</x>
           <y>340</y>
-          <width>711</width>
+          <width>1041</width>
           <height>171</height>
          </rect>
         </property>
@@ -382,7 +407,7 @@
         <widget class="QWidget" name="gridLayoutWidget">
          <property name="geometry">
           <rect>
-           <x>0</x>
+           <x>270</x>
            <y>20</y>
            <width>241</width>
            <height>151</height>
@@ -505,7 +530,7 @@
         <widget class="QWidget" name="gridLayoutWidget_2">
          <property name="geometry">
           <rect>
-           <x>270</x>
+           <x>600</x>
            <y>20</y>
            <width>431</width>
            <height>151</height>
@@ -593,6 +618,30 @@
           </item>
          </layout>
         </widget>
+        <widget class="QWidget" name="gridLayoutWidget_3">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>20</y>
+           <width>201</width>
+           <height>151</height>
+          </rect>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_6">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="live_audio_normalize_checkBox">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Normalize audio value</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </widget>
       </widget>
       <widget class="QWidget" name="socket_tab">
@@ -670,31 +719,6 @@
        </layout>
       </widget>
      </widget>
-    </item>
-    <item row="0" column="0">
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
-       <widget class="QCheckBox" name="settingStayActive">
-        <property name="text">
-         <string>Server stay active after deconnection</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QCheckBox" name="live_use_fade_in_checkBox">
-        <property name="text">
-         <string>Use fade In effect</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QCheckBox" name="live_use_fade_out_checkBox">
-        <property name="text">
-         <string>Use fade Out effect</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
     </item>
    </layout>
   </widget>

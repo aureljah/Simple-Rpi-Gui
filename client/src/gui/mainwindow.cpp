@@ -289,3 +289,8 @@ void MainWindow::on_audio_reset_telemetry_button_clicked()
 {
     this->mode_audio_live->resetTelemetry();
 }
+
+void MainWindow::on_live_audio_normalize_checkBox_toggled(bool checked)
+{
+    this->mode_audio_live->setUseNormalize(checked);
+}

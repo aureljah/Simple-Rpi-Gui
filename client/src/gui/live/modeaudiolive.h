@@ -35,6 +35,10 @@
 #define BUFFER_SIZE 1024
 #define UPDATE_INTERVAL_MS 50 // 20 => 0,02sec => 50 time per seconde
 
+// decrease the max recorded if max is not reached by this time
+#define NORMALIZE_MAX_TIMEOUT_MS 2000
+#define NORMALIZE_MINIMUM_MAX_VALUE 20
+
 #define LINEAR_CHANGE_RATE 0.02
 #define MAX_VALUE_CHANGE_RATE 0.5
 #define MAX_VALUE_CHANGE_RATE_COOLDOWN_MS 250
@@ -63,6 +67,7 @@ public:
     void setUseLinearChange(bool checked);
     void setUseMaxValueChange(bool checked);
     void setMaxValueChange(int value);
+    void setUseNormalize(bool checked);
     void resetTelemetry();
 
 public slots:
@@ -117,7 +122,10 @@ private:
     /* settings */
     int gain;
     double multiplier;
+    int normalize_max_level;
+    qint64 normalize_last_time_max_reched;
 
+    bool use_normalize;
     bool use_linear_change;
     bool use_max_value_change;
     int max_value_change;

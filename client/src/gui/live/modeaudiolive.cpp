@@ -1,8 +1,10 @@
 #include "modeaudiolive.h"
 
 modeAudioLive::modeAudioLive(QWidget *live_audio_tab, modeLive *mode_live, serverApi *server_api)
-    : live_audio_tab(live_audio_tab), mode_live(mode_live), server_api(server_api), audioInput(nullptr), buffer_process_thread(nullptr),
-    current_value(0), max_value(0), min_value(-1), gain(0), multiplier(1),
+    : live_audio_tab(live_audio_tab), mode_live(mode_live), server_api(server_api), audioInput(nullptr),
+    buffer_process_thread(nullptr), buffer_thread_running(false),
+    current_value(0), raw_value(0), max_value(0), min_value(-1), gain(0), multiplier(1),
+    normalize_max_level(0), normalize_last_time_max_reched(0), use_normalize(false),
     use_linear_change(false), use_max_value_change(false), max_value_change(80), last_time_max_change(0), main_output_linear_pin(-1)
 {
     this->changeStatus(AudioStatus::STOPPED);
@@ -52,6 +54,13 @@ void modeAudioLive::setMaxValueChange(int value)
 {
     if (value >= 1 && value <= 101)
         this->max_value_change = value;
+}
+void modeAudioLive::setUseNormalize(bool checked)
+{
+    this->use_normalize = checked;
+
+    if (checked == false)
+        this->normalize_max_level = 0;
 }
 
 void modeAudioLive::startAudio(QAudioDeviceInfo inputDevice)
@@ -199,8 +208,8 @@ void modeAudioLive::printSelectedFormat()
 
 void modeAudioLive::buffer_processing()
 {
-    qInfo() << "buffer_processing starting - isSequential: " << this->audioDevice->isSequential() << "\n";
-    qInfo() << "buffer_processing starting - isReadable: " << this->audioDevice->isReadable() << "\n";
+    //qInfo() << "buffer_processing starting - isSequential: " << this->audioDevice->isSequential() << "\n";
+    //qInfo() << "buffer_processing starting - isReadable: " << this->audioDevice->isReadable() << "\n";
     //const int channelBytes = floor(PCM_SAMPLE_SIZE / 8);
     //const int sampleBytes = PCM_CHANNEL_COUNT * channelBytes;
 
@@ -208,7 +217,7 @@ void modeAudioLive::buffer_processing()
     char *buffer = new char[BUFFER_SIZE + 2];
     while (this->buffer_thread_running)
     {
-        qint64 bytesReady = this->audioInput->bytesReady();
+        //qint64 bytesReady = this->audioInput->bytesReady();
 
         for (int i = 0 ; i < BUFFER_SIZE + 2; i++)
         {   buffer[i] = 0;  }
@@ -222,7 +231,7 @@ void modeAudioLive::buffer_processing()
         //qint64 readed = this->audioDevice->read(buffer, BUFFER_SIZE);
         if (readed > 0)
         {
-            qInfo() << "buffer_processing: readed: " << readed << " - bytesReady: " << bytesReady << "\n";
+            //qInfo() << "buffer_processing: readed: " << readed << " - bytesReady: " << bytesReady << "\n";
 
             //emit current_value_update(buffer, readed);
             qint64 cur_time = QDateTime::currentMSecsSinceEpoch();
@@ -305,14 +314,40 @@ void modeAudioLive::updateAudioValue(int raw_value)
     if (value < 0)
         value = 0;
 
-    qInfo() << "updateAudioValue: value: " << value << "raw value: " << raw_value << "\n";
-
-    this->current_value = value;
     this->raw_value = raw_value;
     if (value < this->min_value || this->min_value == -1)
         this->min_value = value;
     if (value > this->max_value)
         this->max_value = value;
+
+    if (this->use_normalize == true && value > 0)
+    {
+        qint64 cur_time = QDateTime::currentMSecsSinceEpoch();
+        if (value >= this->normalize_max_level)
+        {
+            this->normalize_max_level = value;
+            this->normalize_last_time_max_reched = cur_time;
+        }
+        else if (cur_time >= this->normalize_last_time_max_reched + NORMALIZE_MAX_TIMEOUT_MS)
+        {
+            this->normalize_last_time_max_reched = cur_time;
+            this->normalize_max_level -= 5;
+            if (this->normalize_max_level < value)
+                this->normalize_max_level = value;
+        }
+        if (this->normalize_max_level < NORMALIZE_MINIMUM_MAX_VALUE)
+            this->normalize_max_level = NORMALIZE_MINIMUM_MAX_VALUE;
+
+        if (this->normalize_max_level > 0)
+        {
+            qreal tmp_value = qreal(value) / this->normalize_max_level;
+            value = floor(tmp_value * 100);
+        }
+    }
+
+    this->current_value = value;
+
+    qInfo() << "updateAudioValue: value: " << value << "raw value: " << raw_value << "\n";
 
     this->updateAudioGui();
 
@@ -498,7 +533,12 @@ void modeAudioLive::updateAudioGui() {
 
     QLabel* min_label = live_audio_tab->findChild<QLabel*>("audio_min_label", Qt::FindChildrenRecursively);
     if (min_label)
-        min_label->setText("Min value: " + QString::fromStdString(std::to_string(this->min_value)));
+    {
+        if (this->use_normalize == true)
+            min_label->setText("Normalize Max: " + QString::fromStdString(std::to_string(this->normalize_max_level)));
+        else
+            min_label->setText("Min value: " + QString::fromStdString(std::to_string(this->min_value)));
+    }
 
     QLabel* raw_label = live_audio_tab->findChild<QLabel*>("audio_raw_value_label", Qt::FindChildrenRecursively);
     if (raw_label)
