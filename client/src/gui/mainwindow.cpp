@@ -3,7 +3,7 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow), mode_audio_live(nullptr), server_stay_alive(false)
+    ui(new Ui::MainWindow), mode_audio_live(nullptr)
 {
     this->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, this->size(), qApp->desktop()->screenGeometry(this)));
     ui->setupUi(this);
@@ -12,8 +12,6 @@ MainWindow::MainWindow(QWidget *parent) :
     this->server_api = new serverApi(this->main_sock);
     QObject::connect(this->server_api, &serverApi::send_recv_server_msg,
                      this, &MainWindow::writeToDebugScreen);
-    QObject::connect(this->server_api, &serverApi::stay_alive_setting,
-                     this, &MainWindow::setServerStayAlive);
     QObject::connect(this->server_api, &serverApi::use_fade_in_setting,
                      this, &MainWindow::setFadeIn);
     QObject::connect(this->server_api, &serverApi::use_fade_out_setting,
@@ -29,10 +27,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(this->server_api, &serverApi::input_value_changed,
                      this->mode_live, &modeLive::update_input_value);
 
+    this->settings_manager = new SettingsManager();
 
     this->startConnectWin();
 
-    this->mode_audio_live = new modeAudioLive(ui->audio_tab, this->mode_live, this->server_api);
+    this->mode_audio_live = new modeAudioLive(ui->audio_tab, this->mode_live, this->server_api, this->settings_manager);
     QObject::connect(this, &MainWindow::enter_audio_tab,
                      this->mode_audio_live, &modeAudioLive::updateOutputSelect);
 
@@ -40,6 +39,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->live_audio_controller_comboBox->clear();
     foreach (auto i, info) ui->live_audio_controller_comboBox->addItem(i.deviceName());
     ui->live_audio_controller_comboBox->setCurrentText(QAudioDeviceInfo::defaultInputDevice().deviceName());
+
+    ui->live_audio_controller_comboBox->setCurrentText(this->settings_manager->getDataStr(SettingsManager::AUDIO_LAST_AUDIOINPUT));
+    ui->live_audio_gain_spinBox->setValue(this->settings_manager->getDataInt(SettingsManager::AUDIO_LAST_GAIN));
+    ui->live_audio_mult_doubleSpinBox->setValue(this->settings_manager->getDataDouble(SettingsManager::AUDIO_LAST_MULTIPLIER));
+    ui->live_audio_normalize_checkBox->setChecked(this->settings_manager->getDataBool(SettingsManager::AUDIO_LAST_USE_NORMALIZE));
+    ui->live_audio_linear_change_checkBox->setChecked(this->settings_manager->getDataBool(SettingsManager::AUDIO_LAST_USE_LINEAR));
+    ui->live_audio_max_value_change_checkBox->setChecked(this->settings_manager->getDataBool(SettingsManager::AUDIO_LAST_USE_MAX_VALUE_CHANGE));
+    ui->live_audio_max_value_change_spinBox->setValue(this->settings_manager->getDataInt(SettingsManager::AUDIO_LAST_MAX_VALUE_CHANGE));
 }
 
 MainWindow::~MainWindow()
@@ -50,7 +57,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::startConnectWin()
 {
-    auto win = new connection(this->main_sock);
+    auto win = new connection(this->main_sock, this->settings_manager);
 
     QObject::connect(win, &connection::connected,
                      this, &MainWindow::onConnected);
@@ -173,21 +180,6 @@ void MainWindow::on_live_add_input_pushButton_clicked()
     this->mode_live->startGpioSettingDialog(gpioSettingDialog::INPUT);
 }
 
-void MainWindow::setServerStayAlive(bool value)
-{
-    this->server_stay_alive = value;
-    ui->settingStayActive->setChecked(value);
-}
-
-void MainWindow::on_settingStayActive_toggled(bool checked)
-{
-    this->server_stay_alive = checked;
-    if (checked == true)
-        this->server_api->setServerSetting("stay_active", "true");
-    else
-        this->server_api->setServerSetting("stay_active", "false");
-}
-
 void MainWindow::on_tabWidget_currentChanged(int index)
 {
     if (ui->tabWidget->currentWidget() == ui->audio_tab)
@@ -240,6 +232,10 @@ void MainWindow::on_live_audio_setting_reset_button_clicked()
 {
     ui->live_audio_gain_spinBox->setValue(0);
     ui->live_audio_mult_doubleSpinBox->setValue(1);
+    ui->live_audio_max_value_change_spinBox->setValue(80);
+    ui->live_audio_linear_change_checkBox->setChecked(false);
+    ui->live_audio_max_value_change_checkBox->setChecked(false);
+    ui->live_audio_normalize_checkBox->setChecked(false);
 }
 
 void MainWindow::on_live_audio_linear_change_checkBox_toggled(bool checked)
@@ -257,34 +253,6 @@ void MainWindow::on_live_audio_max_value_change_spinBox_valueChanged(int arg1)
     this->mode_audio_live->setMaxValueChange(arg1);
 }
 
-void MainWindow::setFadeIn(bool value)
-{
-    this->use_fade_in = value;
-    ui->live_use_fade_in_checkBox->setChecked(value);
-}
-void MainWindow::on_live_use_fade_in_checkBox_toggled(bool checked)
-{
-    this->use_fade_in = checked;
-    if (checked == true)
-        this->server_api->setServerSetting("use_fade_in", "true");
-    else
-        this->server_api->setServerSetting("use_fade_in", "false");
-}
-
-void MainWindow::setFadeOut(bool value)
-{
-    this->use_fade_out = value;
-    ui->live_use_fade_out_checkBox->setChecked(value);
-}
-void MainWindow::on_live_use_fade_out_checkBox_toggled(bool checked)
-{
-    this->use_fade_out = checked;
-    if (checked == true)
-        this->server_api->setServerSetting("use_fade_out", "true");
-    else
-        this->server_api->setServerSetting("use_fade_out", "false");
-}
-
 void MainWindow::on_audio_reset_telemetry_button_clicked()
 {
     this->mode_audio_live->resetTelemetry();
@@ -293,4 +261,48 @@ void MainWindow::on_audio_reset_telemetry_button_clicked()
 void MainWindow::on_live_audio_normalize_checkBox_toggled(bool checked)
 {
     this->mode_audio_live->setUseNormalize(checked);
+}
+
+void MainWindow::on_settings_action_triggered()
+{
+    auto win = new SettingsPage(this->server_api, this->settings_manager, this);
+
+    QObject::connect(win, &SettingsPage::live_audio_update_interval_changed,
+                     this->mode_audio_live, &modeAudioLive::setUpdateInterval);
+    QObject::connect(win, &SettingsPage::live_audio_normalize_timeout_changed,
+                     this->mode_audio_live, &modeAudioLive::setNormalizeTimeout);
+    QObject::connect(win, &SettingsPage::live_audio_normalize_min_value_changed,
+                     this->mode_audio_live, &modeAudioLive::setNormalizeMinValue);
+    QObject::connect(win, &SettingsPage::live_audio_linear_change_rate_changed,
+                     this->mode_audio_live, &modeAudioLive::setLinearChangeRate);
+    QObject::connect(win, &SettingsPage::live_audio_max_value_change_rate_changed,
+                     this->mode_audio_live, &modeAudioLive::setMaxValueChangeRate);
+    QObject::connect(win, &SettingsPage::live_audio_max_value_change_cooldown_changed,
+                     this->mode_audio_live, &modeAudioLive::setMaxValueChangeCooldown);
+
+    win->setAttribute(Qt::WA_DeleteOnClose);
+    win->show();
+}
+
+void MainWindow::setFadeIn(bool value)
+{
+    ui->actionLive_output_use_fade_In_effect->setChecked(value);
+}
+void MainWindow::on_actionLive_output_use_fade_In_effect_toggled(bool arg1)
+{
+    if (arg1 == true)
+        this->server_api->setServerSetting("use_fade_in", "true");
+    else
+        this->server_api->setServerSetting("use_fade_in", "false");
+}
+void MainWindow::setFadeOut(bool value)
+{
+    ui->actionLive_output_use_fade_Out_effect->setChecked(value);
+}
+void MainWindow::on_actionLive_output_use_fade_Out_effect_toggled(bool arg1)
+{
+    if (arg1 == true)
+        this->server_api->setServerSetting("use_fade_out", "true");
+    else
+        this->server_api->setServerSetting("use_fade_out", "false");
 }

@@ -29,19 +29,11 @@
 #include <qendian.h>
 #include "Systemcall.hpp"
 #include "live/modelive.h"
+#include "../tools/settingsmanager.hpp"
 
 //#define PCM_CHANNEL_COUNT 1
 #define PCM_SAMPLE_SIZE 16
 #define BUFFER_SIZE 1024
-#define UPDATE_INTERVAL_MS 50 // 20 => 0,02sec => 50 time per seconde
-
-// decrease the max recorded if max is not reached by this time
-#define NORMALIZE_MAX_TIMEOUT_MS 2000
-#define NORMALIZE_MINIMUM_MAX_VALUE 20
-
-#define LINEAR_CHANGE_RATE 0.02
-#define MAX_VALUE_CHANGE_RATE 0.5
-#define MAX_VALUE_CHANGE_RATE_COOLDOWN_MS 250
 
 class modeAudioLive : public QObject
 {
@@ -55,13 +47,14 @@ enum AudioStatus {
 };
 
 public:
-    modeAudioLive(QWidget *live_audio_tab, modeLive *mode_live, serverApi *server_api);
+    modeAudioLive(QWidget *live_audio_tab, modeLive *mode_live, serverApi *server_api, SettingsManager *setting_manager);
     ~modeAudioLive();
 
     void startAudio(QAudioDeviceInfo inputDevice);
     void stopAudio();
     AudioStatus getStatus() {return this->status;};
 
+    /* options */
     void setGain(int gain);
     void setMultiplier(double mult);
     void setUseLinearChange(bool checked);
@@ -73,12 +66,20 @@ public:
 public slots:
     void updateOutputSelect();
 
+    /* settings */
+    void setUpdateInterval(int interval);
+    void setNormalizeTimeout(int timeout);
+    void setNormalizeMinValue(int min_value);
+    void setLinearChangeRate(double change_rate);
+    void setMaxValueChangeRate(double change_rate);
+    void setMaxValueChangeCooldown(int cooldown);
+
 private:
     bool setUpAudio(QAudioDeviceInfo inputDevice);
     void useCheckedOutput();
     void updateAudioGui();
     void changeStatus(AudioStatus status, QString added_text = "");
-    void setMaxAplitude();
+    void setMaxAmplitude();
     void audioBufferToLevel(char *data, int len);
 
     bool checkOutputCoef(std::vector<int> output_list);
@@ -101,6 +102,7 @@ private:
     QWidget *live_audio_tab;
     modeLive *mode_live;
     serverApi *server_api;
+    SettingsManager *setting_manager;
 
     QAudioInput *audioInput;
     QIODevice *audioDevice;
@@ -120,6 +122,14 @@ private:
     int min_value;
 
     /* settings */
+    int update_interval_ms;
+    int normalize_timeout_ms;
+    int normalize_min_value;
+    double linear_change_rate;
+    double max_value_change_rate;
+    int max_value_change_cooldown;
+
+    /* options */
     int gain;
     double multiplier;
     int normalize_max_level;

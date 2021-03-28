@@ -1,14 +1,24 @@
 #include "modeaudiolive.h"
 
-modeAudioLive::modeAudioLive(QWidget *live_audio_tab, modeLive *mode_live, serverApi *server_api)
-    : live_audio_tab(live_audio_tab), mode_live(mode_live), server_api(server_api), audioInput(nullptr),
-    buffer_process_thread(nullptr), buffer_thread_running(false),
-    current_value(0), raw_value(0), max_value(0), min_value(-1), gain(0), multiplier(1),
+modeAudioLive::modeAudioLive(QWidget *live_audio_tab, modeLive *mode_live, serverApi *server_api, SettingsManager *setting_manager)
+    : live_audio_tab(live_audio_tab), mode_live(mode_live), server_api(server_api), setting_manager(setting_manager),
+    audioInput(nullptr), buffer_process_thread(nullptr), buffer_thread_running(false),
+    current_value(0), raw_value(0), max_value(0), min_value(-1),
+    update_interval_ms(50), normalize_timeout_ms(2000), normalize_min_value(20),
+    linear_change_rate(0.02), max_value_change_rate(0.5), max_value_change_cooldown(250),
+    gain(0), multiplier(1),
     normalize_max_level(0), normalize_last_time_max_reched(0), use_normalize(false),
     use_linear_change(false), use_max_value_change(false), max_value_change(80), last_time_max_change(0), main_output_linear_pin(-1)
 {
     this->changeStatus(AudioStatus::STOPPED);
     this->updateAudioGui();
+
+    this->update_interval_ms = this->setting_manager->getDataInt(SettingsManager::SETTING_AUDIO_UPDATE_INTERVAL);
+    this->normalize_timeout_ms = this->setting_manager->getDataInt(SettingsManager::SETTING_AUDIO_NORMALIZE_TIMEOUT);
+    this->normalize_min_value = this->setting_manager->getDataInt(SettingsManager::SETTING_AUDIO_NORMALIZE_MIN_VALUE);
+    this->linear_change_rate = this->setting_manager->getDataDouble(SettingsManager::SETTING_AUDIO_LINEAR_CHANGE_RATE);
+    this->max_value_change_rate = this->setting_manager->getDataDouble(SettingsManager::SETTING_AUDIO_MAX_VALUE_CHANGE_RATE);
+    this->max_value_change_cooldown = this->setting_manager->getDataInt(SettingsManager::SETTING_AUDIO_MAX_VALUE_CHANGE_COOLDOWN);
 
     // TODO ONE TIME
     QScrollArea *output_scrollArea = live_audio_tab->findChild<QScrollArea*>("live_audio_select_scrollArea", Qt::FindChildrenRecursively);
@@ -24,19 +34,76 @@ modeAudioLive::~modeAudioLive()
 
 }
 
+void modeAudioLive::setUpdateInterval(int interval)
+{
+    if (interval >= 20 && interval <= 2000)
+    {
+        this->update_interval_ms = interval;
+        this->setting_manager->setData(SettingsManager::SETTING_AUDIO_UPDATE_INTERVAL, interval);
+    }
+}
+void modeAudioLive::setNormalizeTimeout(int timeout)
+{
+    if (timeout >= 500 && timeout <= 5000)
+    {
+        this->normalize_timeout_ms = timeout;
+        this->setting_manager->setData(SettingsManager::SETTING_AUDIO_NORMALIZE_TIMEOUT, timeout);
+    }
+
+}
+void modeAudioLive::setNormalizeMinValue(int min_value)
+{
+    if (min_value >= 5 && min_value <= 100)
+    {
+        this->normalize_min_value = min_value;
+        this->setting_manager->setData(SettingsManager::SETTING_AUDIO_NORMALIZE_MIN_VALUE, min_value);
+    }
+}
+void modeAudioLive::setLinearChangeRate(double change_rate)
+{
+    if (change_rate >= 0.01 && change_rate <= 1)
+    {
+        this->linear_change_rate = change_rate;
+        this->setting_manager->setData(SettingsManager::SETTING_AUDIO_LINEAR_CHANGE_RATE, change_rate);
+    }
+}
+void modeAudioLive::setMaxValueChangeRate(double change_rate)
+{
+    if (change_rate >= 0.1 && change_rate <= 1)
+    {
+        this->max_value_change_rate = change_rate;
+        this->setting_manager->setData(SettingsManager::SETTING_AUDIO_MAX_VALUE_CHANGE_RATE, change_rate);
+    }
+}
+void modeAudioLive::setMaxValueChangeCooldown(int cooldown)
+{
+    if (cooldown >= 50 && cooldown <= 5000)
+    {
+        this->max_value_change_cooldown = cooldown;
+        this->setting_manager->setData(SettingsManager::SETTING_AUDIO_MAX_VALUE_CHANGE_COOLDOWN, cooldown);
+    }
+}
+
 void modeAudioLive::setGain(int gain)
 {
     if (gain >= -99 && gain <= 99)
+    {
         this->gain = gain;
+        this->setting_manager->setData(SettingsManager::AUDIO_LAST_GAIN, gain);
+    }
 }
 void modeAudioLive::setMultiplier(double mult)
 {
     if (mult > 0 && mult <= 10)
+    {
         this->multiplier = mult;
+        this->setting_manager->setData(SettingsManager::AUDIO_LAST_MULTIPLIER, mult);
+    }
 }
 void modeAudioLive::setUseLinearChange(bool checked)
 {
     this->use_linear_change = checked;
+    this->setting_manager->setData(SettingsManager::AUDIO_LAST_USE_LINEAR, checked);
 
     // reset linear & max change
     //this->main_output_linear_pin = -1;
@@ -45,6 +112,7 @@ void modeAudioLive::setUseLinearChange(bool checked)
 void modeAudioLive::setUseMaxValueChange(bool checked)
 {
     this->use_max_value_change = checked;
+    this->setting_manager->setData(SettingsManager::AUDIO_LAST_USE_MAX_VALUE_CHANGE, checked);
 
     // reset linear & max change
     //this->main_output_linear_pin = -1;
@@ -53,11 +121,15 @@ void modeAudioLive::setUseMaxValueChange(bool checked)
 void modeAudioLive::setMaxValueChange(int value)
 {
     if (value >= 1 && value <= 101)
+    {
         this->max_value_change = value;
+        this->setting_manager->setData(SettingsManager::AUDIO_LAST_MAX_VALUE_CHANGE, value);
+    }
 }
 void modeAudioLive::setUseNormalize(bool checked)
 {
     this->use_normalize = checked;
+    this->setting_manager->setData(SettingsManager::AUDIO_LAST_USE_NORMALIZE, checked);
 
     if (checked == false)
         this->normalize_max_level = 0;
@@ -84,7 +156,10 @@ void modeAudioLive::startAudio(QAudioDeviceInfo inputDevice)
     if (this->setUpAudio(inputDevice) == false)
         this->changeStatus(AudioStatus::STOPPED, "FORMAT NOT SUPPORTED");
     else
+    {
         this->changeStatus(AudioStatus::RUNNING);
+        this->setting_manager->setData(SettingsManager::AUDIO_LAST_AUDIOINPUT, inputDevice.deviceName());
+    }
 }
 
 void modeAudioLive::stopAudio()
@@ -178,7 +253,7 @@ bool modeAudioLive::setUpAudio(QAudioDeviceInfo inputDevice)
         }
     }
     this->printSelectedFormat();
-    this->setMaxAplitude();
+    this->setMaxAmplitude();
 
     this->audioInput = new QAudioInput(inputDevice, this->formatAudio, this);
     this->audioInput->setBufferSize(BUFFER_SIZE);
@@ -235,7 +310,7 @@ void modeAudioLive::buffer_processing()
 
             //emit current_value_update(buffer, readed);
             qint64 cur_time = QDateTime::currentMSecsSinceEpoch();
-            if (cur_time >= last_time + UPDATE_INTERVAL_MS) {
+            if (cur_time >= last_time + this->update_interval_ms) {
                 last_time = cur_time;
                 this->audioBufferToLevel(buffer, readed);
             }
@@ -328,15 +403,15 @@ void modeAudioLive::updateAudioValue(int raw_value)
             this->normalize_max_level = value;
             this->normalize_last_time_max_reched = cur_time;
         }
-        else if (cur_time >= this->normalize_last_time_max_reched + NORMALIZE_MAX_TIMEOUT_MS)
+        else if (cur_time >= this->normalize_last_time_max_reched + this->normalize_timeout_ms)
         {
             this->normalize_last_time_max_reched = cur_time;
             this->normalize_max_level -= 5;
             if (this->normalize_max_level < value)
                 this->normalize_max_level = value;
         }
-        if (this->normalize_max_level < NORMALIZE_MINIMUM_MAX_VALUE)
-            this->normalize_max_level = NORMALIZE_MINIMUM_MAX_VALUE;
+        if (this->normalize_max_level < this->normalize_min_value)
+            this->normalize_max_level = this->normalize_min_value;
 
         if (this->normalize_max_level > 0)
         {
@@ -449,7 +524,7 @@ void modeAudioLive::updateLinearChangeCoef()
         if (it->first == this->main_output_linear_pin)
         {
             bool need_change_main_pin = false;
-            it->second -= LINEAR_CHANGE_RATE;
+            it->second -= this->linear_change_rate;
             if (it->second < 0)
             {
                 it->second = 0;
@@ -463,7 +538,7 @@ void modeAudioLive::updateLinearChangeCoef()
             if (need_change_main_pin == true)
                 this->main_output_linear_pin = it->first;
 
-            it->second += LINEAR_CHANGE_RATE;
+            it->second += this->linear_change_rate;
             if (it->second > 1)
                 it->second = 1;
             break;
@@ -479,7 +554,7 @@ void modeAudioLive::updateMaxValueChange()
     if (this->current_value >= this->max_value_change)
     {
         qint64 cur_time = QDateTime::currentMSecsSinceEpoch();
-        if (cur_time >= this->last_time_max_change + MAX_VALUE_CHANGE_RATE_COOLDOWN_MS) {
+        if (cur_time >= this->last_time_max_change + this->max_value_change_cooldown) {
             this->last_time_max_change = cur_time;
         }
         else
@@ -490,7 +565,7 @@ void modeAudioLive::updateMaxValueChange()
             if (it->first == this->main_output_linear_pin)
             {
                 float reminder = 0;
-                it->second -= MAX_VALUE_CHANGE_RATE;
+                it->second -= this->max_value_change_rate;
                 if (it->second < 0)
                 {
                     reminder = qAbs(it->second);
@@ -515,7 +590,7 @@ void modeAudioLive::updateMaxValueChange()
                 }
                 else
                 {
-                    it->second += MAX_VALUE_CHANGE_RATE;
+                    it->second += this->max_value_change_rate;
                     if (it->second > 100)
                         it->second = 100;
                 }
@@ -602,7 +677,7 @@ void modeAudioLive::outputSelectedChanged()
     }
 }
 
-void modeAudioLive::setMaxAplitude() {
+void modeAudioLive::setMaxAmplitude() {
     switch (this->formatAudio.sampleSize()) {
     case 8:
         switch (this->formatAudio.sampleType()) {

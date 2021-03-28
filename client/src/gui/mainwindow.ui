@@ -33,32 +33,7 @@
     </sizepolicy>
    </property>
    <layout class="QGridLayout" name="gridLayout_3">
-    <item row="0" column="0">
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="1">
-       <widget class="QCheckBox" name="live_use_fade_in_checkBox">
-        <property name="text">
-         <string>Use fade In effect</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QCheckBox" name="settingStayActive">
-        <property name="text">
-         <string>Server stay active after deconnection</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QCheckBox" name="live_use_fade_out_checkBox">
-        <property name="text">
-         <string>Use fade Out effect</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="7" column="0">
+    <item row="6" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
        <number>0</number>
@@ -92,7 +67,7 @@
              <x>0</x>
              <y>0</y>
              <width>525</width>
-             <height>446</height>
+             <height>478</height>
             </rect>
            </property>
           </widget>
@@ -109,7 +84,7 @@
              <x>0</x>
              <y>0</y>
              <width>524</width>
-             <height>446</height>
+             <height>478</height>
             </rect>
            </property>
           </widget>
@@ -402,7 +377,7 @@
          </rect>
         </property>
         <property name="title">
-         <string>Settings</string>
+         <string>Modifiers</string>
         </property>
         <widget class="QWidget" name="gridLayoutWidget">
          <property name="geometry">
@@ -732,17 +707,36 @@
      <height>23</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuThe_Main_Window">
+   <widget class="QMenu" name="menu_settings">
     <property name="title">
-     <string>The Main Window</string>
+     <string>Settings</string>
     </property>
-    <addaction name="actionalloo"/>
+    <addaction name="settings_action"/>
+    <addaction name="separator"/>
+    <addaction name="actionLive_output_use_fade_In_effect"/>
+    <addaction name="actionLive_output_use_fade_Out_effect"/>
    </widget>
-   <addaction name="menuThe_Main_Window"/>
+   <addaction name="menu_settings"/>
   </widget>
-  <action name="actionalloo">
+  <action name="settings_action">
    <property name="text">
-    <string>Config</string>
+    <string>Preferences</string>
+   </property>
+  </action>
+  <action name="actionLive_output_use_fade_In_effect">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Live output use fade In effect</string>
+   </property>
+  </action>
+  <action name="actionLive_output_use_fade_Out_effect">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Live output use fade Out effect</string>
    </property>
   </action>
  </widget>

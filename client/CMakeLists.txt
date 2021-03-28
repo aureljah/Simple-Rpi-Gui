@@ -35,12 +35,17 @@ add_executable(${EXEC_NAME} src/main.cpp
                         src/tools/tools.h
                         src/tools/serverApi.cpp
                         src/tools/serverApi.hpp
+                        src/tools/settingsmanager.cpp
+                        src/tools/settingsmanager.hpp
                         src/gui/mainwindow.cpp
                         src/gui/mainwindow.h
                         src/gui/mainwindow.ui
                         src/gui/connection.cpp
                         src/gui/connection.h
                         src/gui/connection.ui
+                        src/gui/settingspage.cpp
+                        src/gui/settingspage.h
+                        src/gui/settingspage.ui
                         src/gui/live/modelive.cpp
                         src/gui/live/modelive.h
                         src/gui/live/modeaudiolive.cpp
