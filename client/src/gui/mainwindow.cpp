@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(this->server_api, &serverApi::error_500,
                      this, &MainWindow::error_500_handler);
 
-    this->mode_live = new modeLive(ui->live_tab, this->server_api);
+    this->mode_live = new modeLive(ui->live_tab, this->server_api, this->settings_manager);
     QObject::connect(this->server_api, &serverApi::new_live_input,
                      this->mode_live, &modeLive::add_input);
     QObject::connect(this->server_api, &serverApi::new_live_output,
@@ -267,6 +267,8 @@ void MainWindow::on_settings_action_triggered()
 {
     auto win = new SettingsPage(this->server_api, this->settings_manager, this);
 
+    QObject::connect(win, &SettingsPage::live_input_poll_time_changed,
+                     this->mode_live, &modeLive::setInputPollTime);
     QObject::connect(win, &SettingsPage::live_audio_update_interval_changed,
                      this->mode_audio_live, &modeAudioLive::setUpdateInterval);
     QObject::connect(win, &SettingsPage::live_audio_normalize_timeout_changed,

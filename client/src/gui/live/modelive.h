@@ -18,17 +18,18 @@
 #include "dynamicinput.h"
 #include "gpiosettingdialog.h"
 #include "../tools/serverApi.hpp"
+#include "../tools/settingsmanager.hpp"
 #include "../tools/tools.h"
-
-# define INPUT_POLL_TIME 2000
 
 class modeLive : public QObject
 {
     Q_OBJECT
 
 public:
-    modeLive(QWidget *live_tab, serverApi *server_api);
+    modeLive(QWidget *live_tab, serverApi *server_api, SettingsManager *setting_manager);
     ~modeLive();
+
+    void setInputPollTime(int poll_time);
 
     void addInputOutput(QString name, int pin, gpioSettingDialog::gpio_type type, QString old_name, int old_pin, int value = 0);
     void startGpioSettingDialog(gpioSettingDialog::gpio_type type, QString old_name = nullptr);
@@ -65,10 +66,14 @@ public slots:
 private:
     QWidget *live_tab;
     serverApi *server_api;
+    SettingsManager *setting_manager;
 
     std::thread *input_thread;
     std::mutex input_thread_mutex;
     bool input_thread_running;
+
+    /* settings */
+    int input_poll_time;
 
     QVBoxLayout *out_vlayout;
     std::map<QString, dynamicOutput*> dyn_o_widgets;

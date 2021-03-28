@@ -1,8 +1,11 @@
 #include "modelive.h"
 
-modeLive::modeLive(QWidget *live_tab, serverApi *server_api)
-    : live_tab(live_tab), server_api(server_api), input_thread(nullptr), input_thread_running(false)
+modeLive::modeLive(QWidget *live_tab, serverApi *server_api, SettingsManager *setting_manager)
+    : live_tab(live_tab), server_api(server_api), input_thread(nullptr), input_thread_running(false),
+      input_poll_time(2000)
 {
+    this->input_poll_time = this->setting_manager->getDataInt(SettingsManager::SETTING_LIVE_INPUT_POLL_TIME);
+
     QWidget *out_widget = new QWidget();
     QScrollArea *output_scrollArea = live_tab->findChild<QScrollArea*>("live_output_scrollArea", Qt::FindChildrenRecursively);
     if (output_scrollArea != nullptr)
@@ -41,6 +44,15 @@ modeLive::~modeLive()
     this->input_thread_running = false;
 
     // TODO
+}
+
+void modeLive::setInputPollTime(int poll_time)
+{
+    if (poll_time >= 500 && poll_time <= 5000)
+    {
+        this->input_poll_time = poll_time;
+        this->setting_manager->setData(SettingsManager::SETTING_LIVE_INPUT_POLL_TIME, poll_time);
+    }
 }
 
 void modeLive::server_input_receiver()
@@ -83,8 +95,8 @@ void modeLive::server_input_receiver()
         this->input_thread_mutex.lock();
         if (this->input_thread_running) {
             this->input_thread_mutex.unlock();
-            qInfo() << "server_input_receiver: WILL TRY CONNECT AGAIN IN " << INPUT_POLL_TIME << "millisec\n";
-            systemcall::sys_usleep(INPUT_POLL_TIME);
+            qInfo() << "server_input_receiver: WILL TRY CONNECT AGAIN IN " << this->input_poll_time << "millisec\n";
+            systemcall::sys_usleep(this->input_poll_time);
         }
         else {
             //qInfo() << "server_input_receiver: WILL EXIT(connect loop)\n";
