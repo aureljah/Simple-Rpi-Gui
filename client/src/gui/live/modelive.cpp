@@ -1,7 +1,8 @@
 #include "modelive.h"
 
 modeLive::modeLive(QWidget *live_tab, serverApi *server_api, SettingsManager *setting_manager)
-    : live_tab(live_tab), server_api(server_api), input_thread(nullptr), input_thread_running(false),
+    : live_tab(live_tab), server_api(server_api), setting_manager(setting_manager),
+      input_thread(nullptr), input_thread_running(false),
       input_poll_time(2000)
 {
     this->input_poll_time = this->setting_manager->getDataInt(SettingsManager::SETTING_LIVE_INPUT_POLL_TIME);

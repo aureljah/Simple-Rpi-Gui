@@ -19,6 +19,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(this->server_api, &serverApi::error_500,
                      this, &MainWindow::error_500_handler);
 
+    this->settings_manager = new SettingsManager();
+
     this->mode_live = new modeLive(ui->live_tab, this->server_api, this->settings_manager);
     QObject::connect(this->server_api, &serverApi::new_live_input,
                      this->mode_live, &modeLive::add_input);
@@ -26,8 +28,6 @@ MainWindow::MainWindow(QWidget *parent) :
                      this->mode_live, &modeLive::add_output);
     QObject::connect(this->server_api, &serverApi::input_value_changed,
                      this->mode_live, &modeLive::update_input_value);
-
-    this->settings_manager = new SettingsManager();
 
     this->startConnectWin();
 
