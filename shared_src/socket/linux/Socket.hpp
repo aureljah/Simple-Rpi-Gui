@@ -16,7 +16,7 @@
 class Socket : public ASocket
 {
 public:
-    Socket(std::string path_cert, OpensslWrapper::socketType type); // server's socket
+    Socket(std::string path_cert, std::string path_key, OpensslWrapper::socketType type); // server's socket
     Socket(int fd, const struct sockaddr_in& sin, SSL* ssl, OpensslWrapper* openssl); // client's socket
     ~Socket();
 

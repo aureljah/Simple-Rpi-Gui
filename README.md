@@ -1,62 +1,48 @@
-# simple_rpi_gui
-A simple remote gui for control rpi pins written in C++.
-it'll be cross-platform (linux and windows) and will have a server side which must be running on rpi.
-## WIP
-<br/>
+# Simple Rpi Gui
+A simple remote gui to control Raspberry Pi's pins, written in C++.
+  
+it's composed of a **Server** (Raspberry only) and a **Client** (Linux and Windows) based on Qt.
 
-## Requirement
-  ### Client
-	-> CMake 3.10
-	-> OpenSSL 1.1.0+ - You can also find windows binaries on openssl wiki
-	-> Qt 5.13 (Open source)
+*Disclamer: This project is not final and might have bugs, issues and incompletes features.*
 
-  ### Server
-  -> OpenSSL 1.1.0+
-  -> pigpio
-    Follow instruction on http://abyz.me.uk/rpi/pigpio/download.html
-<br/>
+## Build / Install
+See here: [Build instruction](./doc/BUILD.md).
 
-# Usage
-  ### linux - Server
-    $cd server
-    $make
-    $./server
+## How to use
 
-  ### linux - Client
-    Opening CMakeList.txt with QtCreator
-    
-    Or
-    
-    $cd client
-    $make or $make build or $make re	(to build with cmake)
-    $cd build 				(or an other dir defined as BUILD_DIR in Makefile)
-    $make				(to compile and generate binairies)
-    $./simple_rpi_gui			(works better when server is runing)
+### Step 1: Starting
+1. **Build server and client (See [Build instruction](./doc/BUILD.md))**
+2. **Generate cert & key (See [Build instruction](./doc/BUILD.md))**
+3. **Copy mycert.pem and key.pem in client and server location**
+4. **Start the server** on your raspberry 
+5. **Start the client**
 
-    $make clean 			(to clean the build folder)
+### Step 2: Connection
+![Connection window](./doc/pic/connection_window.png "Connection window")
+- **Enter the IP and Port of your server and click "OK"**
+- **For now, The port is always 4242**
+- Before connecting, you can add the current IP / Port as Favorite
 
-  ### Linux - Generate certificate (all the parameters is up to you EXCEPT the name)
-     $openssl req -x509 -nodes -days 365 -newkey rsa:1024 -keyout key.pem -out mycert.pem
-     
-     -> mycert.pem will contain the certificate and key.pem will contain the private key.
-     -> client only need certificate but server need both certificate and private key.
-     -->> ATM certificate must be named mycert.pem and all private key must be named key.pem
-     	  they must be in the same folder as the program (e.g. client/ or server/)
+### Step 3: Adding Output & Input
+![Main window](./doc/pic/main_window.png "Main window")
+- **You can click "Add Output" or "Add input" to add and setup a pin as output or input**
+![Adding output window](./doc/pic/add_output_window.png "Adding output window")
+- **You can select the GPIO pin number that will be used as output (set a value to the pin) or as input (reading a value from a pin)**
+- You can set a custom name for this output / input.
+  
+![Main window](./doc/pic/main_window.png "Main window")
+**Now that we have our output and input created, we can now see the value readed in real time for inputs**  
 
-  ### windows - Client
-    Opening CMakeList.txt with QtCreator
-    
-    Or
-    
-    $win_make.bat (to build with cmake)
-	 $cd build
-		Then, depend of your compilo
+**We can now change the value in real time for outputs:**
+- **Clicking "Pin ON":** Will set the pin value to 1 or 100%.
+- **Clicking "Pin OFF":** Will set the pin value to 0 or 0%.
+- **Sliding the bar:** change from 0% to 100%. *This make use of the PWM (Pulse-Width Modulation) feature in a Raspberry Pi*.
+  
+*Every action is directly applied to the raspberry Pi via the server*
 
-	 $win_make.bat clean 			(to clean the build folder)
+**Other interaction:**
+- You can **change the name and the GPIO pin** used to double clicking on the title of an output / input. *(ex: double clicking on "LED B - GPIO 2" showed in the picture above)*.
+- You can move up and down any output or input by using the arrows on the right of each one to help you organize as you wish.
+- The trash icon in the top right of each output or input is to delete it. For outputs, it will always set the input value to 0 before deleting.
 
-<br/>
 
-## NOTE
-  ### You may want to include these include dir into your editor for server (these are based on vscode)
-                "${workspaceFolder}/../../shared_src/socket/linux/"
-                "${workspaceFolder}/../../shared_src/socket/"

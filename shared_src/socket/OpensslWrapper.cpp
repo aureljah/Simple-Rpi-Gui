@@ -1,7 +1,7 @@
 #include "OpensslWrapper.hpp"
 
-OpensslWrapper::OpensslWrapper(std::string path_ctx, socketType stype) : 
-    path_ctx(path_ctx.c_str()), stype(stype), ctx(NULL)
+OpensslWrapper::OpensslWrapper(std::string path_ctx, std::string path_key, socketType stype) :
+    path_ctx(path_ctx.c_str()), path_key(path_key.c_str()), stype(stype), ctx(NULL)
 {
     this->initOpenssl();
     this->createContext();
@@ -46,19 +46,16 @@ void OpensslWrapper::configureContext()
 {
     SSL_CTX_set_ecdh_auto(this->ctx, 1);
 
-    if (this->stype == SERVER)
-    {
-        SSL_CTX_set_verify(this->ctx, SSL_VERIFY_PEER
-                // | SSL_VERIFY_FAIL_IF_NO_PEER_CERT
-                /*| SSL_VERIFY_CLIENT_ONCE*/
-                , NULL);
-    }
+    SSL_CTX_set_verify(this->ctx, SSL_VERIFY_PEER
+             | SSL_VERIFY_FAIL_IF_NO_PEER_CERT
+            /*| SSL_VERIFY_CLIENT_ONCE*/
+            , NULL);
 
     /* Set the key and cert */
     if (SSL_CTX_use_certificate_file(this->ctx, this->path_ctx, SSL_FILETYPE_PEM) <= 0)
         throw("SSL_CTX_use_certificate_file");
 
-    if (SSL_CTX_use_PrivateKey_file(this->ctx, this->path_ctx, SSL_FILETYPE_PEM) <= 0 )
+    if (SSL_CTX_use_PrivateKey_file(this->ctx, this->path_key, SSL_FILETYPE_PEM) <= 0)
         throw("SSL_CTX_use_PrivateKey_file");
 
     if(!SSL_CTX_load_verify_locations(ctx, this->path_ctx, NULL))

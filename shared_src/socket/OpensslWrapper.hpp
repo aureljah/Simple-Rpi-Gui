@@ -14,7 +14,7 @@ public:
     };
 
 public:
-    OpensslWrapper(std::string path_ctx, socketType stype);
+    OpensslWrapper(std::string path_ctx, std::string path_key, socketType stype);
     ~OpensslWrapper();
 
 public:
@@ -29,6 +29,7 @@ private:
 
 private:
     const char *path_ctx;
+    const char *path_key;
     socketType stype;
     SSL_CTX *ctx;
 

@@ -1,13 +1,13 @@
 #include <iostream>
 #include "Socket.hpp"
 
-Socket::Socket(std::string path_cert, OpensslWrapper::socketType type)
+Socket::Socket(std::string path_cert, std::string path_key, OpensslWrapper::socketType type)
     : _fd(0), _sin(), _ssl(NULL), ip("")
 {
-    this->_openssl = new OpensslWrapper(path_cert, type);
-    
+    this->_openssl = new OpensslWrapper(path_cert, path_key, type);
+
 	WSADATA WSAData;
-	
+
 	WSAStartup(MAKEWORD(2, 0), &WSAData);
     _fd = socket(AF_INET, SOCK_STREAM, /*IPPROTO_TCP*/ 0);
     char on = 1;
@@ -44,7 +44,7 @@ void Socket::connect(std::string ip, int port)
         getsockname(_fd, reinterpret_cast<struct sockaddr*>(&_sin), &sin_size);
 
 		this->_ssl = this->_openssl->newSSL(static_cast<int>(this->_fd));
-		if ((ret = SSL_connect(this->_ssl)) == -1)
+		if ((ret = SSL_connect(this->_ssl)) <= 0)
 		{
 			SSL_get_error(this->_ssl, ret);
 			ERR_print_errors_fp(stdout);
@@ -97,7 +97,6 @@ ISocket* Socket::accept()
 		throw("SSL_accept");
 	}
 
-	std::cout << "INFO: new connexion accepted - " << SSL_get_version(cssl) << " used.\n";
 	X509 *peer = NULL;
 	peer = SSL_get_peer_certificate(cssl);
 	if (peer) {
@@ -105,11 +104,14 @@ ISocket* Socket::accept()
 			std::cout << "INFO: verify peer cert is OK" << std::endl;
 		}
 		else
-			std::cout << "INFO: SSL_get_verify_result failed\n";
+            throw("SSL_get_verify_result failed");
+			//std::cout << "INFO: SSL_get_verify_result failed\n";
 	}
 	else
-		std::cout << "INFO: SSL_get_peer_certificate failed\n";
+        throw("SSL_get_peer_certificate failed");
+		//std::cout << "INFO: SSL_get_peer_certificate failed\n";
 
+	std::cout << "INFO: new connexion accepted - " << SSL_get_version(cssl) << " used.\n";
 	return (new Socket(cfd, csin, cssl, this->_openssl));
 }
 

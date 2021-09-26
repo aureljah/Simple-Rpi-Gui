@@ -7,7 +7,7 @@ int main(int ac, char **av)
   std::cout << "[INFO]: Starting Server...\n" << std::endl;
   try {
     MainServer* server = new MainServer();
-    server->run(4242, "mycert.pem");
+    server->run(4242, "mycert.pem", "key.pem");
   }
   catch(char const *msg) {
     std::cerr << "Main Error: " << msg << "\n";

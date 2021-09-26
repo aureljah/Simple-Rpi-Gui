@@ -345,9 +345,9 @@ void MainServer::onDisconnected()
         this->deleteAllMode();
 }
 
-void MainServer::run(int port, std::string cert_path)
+void MainServer::run(int port, std::string cert_path, std::string key_path)
 {
-    ISocket *sock = new Socket(cert_path, OpensslWrapper::SERVER);
+    ISocket *sock = new Socket(cert_path, key_path, OpensslWrapper::SERVER);
     ISocket *client = NULL;
     try {
         sock->bind(port);

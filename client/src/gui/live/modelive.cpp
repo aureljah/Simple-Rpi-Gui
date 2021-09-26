@@ -61,7 +61,7 @@ void modeLive::server_input_receiver()
     bool will_exit = false;
     std::thread *this_thread = this->input_thread;
 
-    ISocket *input_sock = new Socket("mycert.pem", OpensslWrapper::CLIENT);
+    ISocket *input_sock = new Socket("mycert.pem", "key.pem", OpensslWrapper::CLIENT);
     while (will_exit == false) {
         try {
             std::cout << "server_input_receiver: try to connect on " << this->server_api->getServerIp() << " : " << this->server_api->getInputReceiverPort() << "\n";

@@ -35,8 +35,6 @@ public:
     void writeToDebugScreen(std::string msg, std::string type);
     void pingServeur(QString msg);
 
-    void second_thread_test();
-
     void setFadeIn(bool value);
     void setFadeOut(bool value);
 

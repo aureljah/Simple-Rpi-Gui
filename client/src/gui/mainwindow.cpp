@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, this->size(), qApp->desktop()->screenGeometry(this)));
     ui->setupUi(this);
 
-    this->main_sock = new Socket("mycert.pem", OpensslWrapper::CLIENT);
+    this->main_sock = new Socket("mycert.pem", "key.pem", OpensslWrapper::CLIENT);
     this->server_api = new serverApi(this->main_sock);
     QObject::connect(this->server_api, &serverApi::send_recv_server_msg,
                      this, &MainWindow::writeToDebugScreen);
@@ -94,41 +94,6 @@ void MainWindow::pingServeur(QString msg)
     ui->plainTextEdit->appendPlainText("[SERVER]: " + QString::fromStdString((serv_msg)));
     lock_text_screen.unlock();
     //qInfo() << "[CLIENT] server: " << QString::fromStdString(msg) << "\n";
-}
-
-void MainWindow::second_thread_test()
-{
-    try {
-    ISocket *sock = new Socket("mycert.pem", OpensslWrapper::SERVER);
-    ISocket *server = nullptr;
-
-    sock->bind(4243);
-    sock->listen(1);
-    if ((server = sock->accept()) != NULL)
-    {
-        while (true)
-        {
-            try {
-            std::string msg;
-            msg = server->read(4096);
-            qInfo() << "INFO 2nd thread: msg_read: " << QString::fromStdString(msg);
-            emit new_serv_msg(QString::fromStdString(msg));
-            //lock_text_screen.lock();
-            //ui->plainTextEdit->appendPlainText("[SERVER]: " + QString::fromStdString(msg));
-            //lock_text_screen.unlock();
-            }
-            catch(char const *msg) {
-              std::cerr << "Error: " << msg << "\n";
-              break;
-            }
-        }
-        delete server;
-    }
-    delete sock;
-   }
-    catch(char const *msg) {
-      std::cerr << "Error: " << msg << "\n";
-    }
 }
 
 void MainWindow::onMsgFromServer(QString msg)

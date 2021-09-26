@@ -139,7 +139,7 @@ void LiveMode::setFade(bool fade_in, bool fade_out)
 
 void LiveMode::input_monitor(int base_port)
 {
-  ISocket *sock = new Socket("mycert.pem", OpensslWrapper::SERVER);
+  ISocket *sock = new Socket("mycert.pem", "key.pem", OpensslWrapper::SERVER);
   ISocket *client = NULL;
   try {
     sock->bind(base_port + 1);
@@ -153,7 +153,7 @@ void LiveMode::input_monitor(int base_port)
         FD_SET(sock->getSockFd(), &rfds);
         struct timeval tv;
         if (this->monitor_poll_time > 999)
-            tv.tv_sec = floor(this->monitor_poll_time / 1000);
+            tv.tv_sec = floor((double) this->monitor_poll_time / 1000);
         else
             tv.tv_sec = 0;
         tv.tv_usec = floor(this->monitor_poll_time % 1000) * 1000;

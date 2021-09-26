@@ -16,7 +16,7 @@ public:
     ~MainServer();
 
 public:
-    void run(int port, std::string cert_path); // inf loop on socket accept & socket read
+    void run(int port, std::string cert_path, std::string key_path); // inf loop on socket accept & socket read
 
 private:
     void onDisconnected();

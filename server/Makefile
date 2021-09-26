@@ -26,7 +26,7 @@ SRC = src/main.cpp \
 HDR =	-I../shared_src/socket \
 		-I../shared_src/socket/linux
 
-all: test_build
+all: rpi
 
 test_build:
 	$(CXX) $(CFLAGS) $(SRC) $(TEST_SRC) $(HDR) $(TEST_HDR) -o $(NAME) $(LDFLAGS)
