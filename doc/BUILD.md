@@ -25,7 +25,14 @@ $ ./server
 ```
 *Note: The command `make test_build` is also available to make a server for a non-raspberry linux computer. This will make a server that doesn't use the features of a Raspberry Pi and can serve for testing purpose.*
 
-### Linux - Client
+### Generate certificate (Linux)
+`$openssl req -x509 -nodes -days 365 -newkey rsa:1024 -keyout key.pem -out mycert.pem`
+  
+*`mycert.pem` will contain the certificate and `key.pem` will contain the private key.*
+  
+**For now, the certificate must be named `mycert.pem` and all private key must be named `key.pem`. They must be in the same folder as the program (e.g. `client/` or `server/`).**
+
+## Client - Linux
 You can either open ``CMakeList.txt`` with `QtCreator`.
   
 **Or you can use the following commands:** 
@@ -38,14 +45,7 @@ You can either open ``CMakeList.txt`` with `QtCreator`.
   
 *Note: `$ make clean` can be used to clean the build folder and delete all generated files.*
 
-### Linux - Generate certificate (all the parameters is up to you EXCEPT the name)
-`$openssl req -x509 -nodes -days 365 -newkey rsa:1024 -keyout key.pem -out mycert.pem`
-  
-*`mycert.pem` will contain the certificate and `key.pem` will contain the private key.*
-  
-**For now, the certificate must be named `mycert.pem` and all private key must be named `key.pem`. They must be in the same folder as the program (e.g. `client/` or `server/`).**
-
-### Windows - Client
+## Windows - Client
 You can either open ``CMakeList.txt`` with `QtCreator`.
   
 **Or you can use the following commands:** 
@@ -59,7 +59,7 @@ You can either open ``CMakeList.txt`` with `QtCreator`.
   
 *Note: `$ win_make.bat clean` can be used to clean the build folder and delete all generated files.*
   
-### Note for developer
+## Note for developer
 **You may want to include these include dir into your editor for server (these are based on vscode)**
 `${workspaceFolder}/../../shared_src/socket/linux/`
 `${workspaceFolder}/../../shared_src/socket/`

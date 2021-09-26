@@ -41,8 +41,8 @@ See here: [Build instruction](./doc/BUILD.md).
 *Every action is directly applied to the raspberry Pi via the server*
 
 **Other interaction:**
-- You can **change the name and the GPIO pin** used to double clicking on the title of an output / input. *(ex: double clicking on "LED B - GPIO 2" showed in the picture above)*.
-- You can move up and down any output or input by using the arrows on the right of each one to help you organize as you wish.
-- The trash icon in the top right of each output or input is to delete it. For outputs, it will always set the input value to 0 before deleting.
+- You can **change the name and the GPIO pin** used by double clicking on the title of an output / input. *(ex: double clicking on "LED B - GPIO 2" showed in the picture above)*.
+- You can **move up and down any output or input** by using the arrows on the right of each one to help you organize as you wish.
+- You can **delete an output or input** by clicking on the trash icon in the top right of each output / input. For outputs, it will always set the input value to 0 before deleting.
 
 
